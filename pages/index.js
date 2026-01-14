@@ -3,9 +3,9 @@ import Head from 'next/head';
 import Link from 'next/link';
 
 export default function Dashboard() {
-  // Data disesuaikan: Sekat 1 aktif, sisanya placeholder (Rencana Pengembangan)
+  // data disesuaikan: sekat 1 aktif, sisanya placeholder (rencana pengembangan)
   const [daftarAlat, setDaftarAlat] = useState([
-    { id: 'sekat_1', nama: 'Sekat 1', berat: 18.5, status: 'online' }, // Penuh 20kg, kepakai dikit
+    { id: 'sekat_1', nama: 'Sekat 1', berat: 18.5, status: 'online' }, // penuh 20kg, kepake dikit
     { id: 'sekat_2', nama: 'Sekat 2', berat: 0, status: 'offline' },
     { id: 'sekat_3', nama: 'Sekat 3', berat: 0, status: 'offline' },
     { id: 'sekat_4', nama: 'Sekat 4', berat: 0, status: 'offline' },
@@ -63,7 +63,7 @@ export default function Dashboard() {
                     </div>
                 </div>
 
-                {/* Ikon Panah (Cuma muncul kalau online) */}
+                {/* ikon panah (cuma muncul kalau online) */}
                 {alat.status === 'online' && (
                   <div className="bg-gray-50 p-2 rounded-full group-hover:bg-blue-50 transition-colors">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 text-gray-400 group-hover:text-blue-500">

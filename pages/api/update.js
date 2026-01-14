@@ -2,25 +2,25 @@ import dbConnect from '../../lib/db';
 import Alat from '../../models/alat';
 
 export default async function handler(req, res) {
-  // 1. Konek ke Database dulu
+  // 1. konek ke database
   await dbConnect();
 
-  // ID Alat kita kunci 'sekat_1' aja biar simpel buat KKN
+  // id alat (sekat 1)
   const id_target = 'sekat_1';
 
-  // === KALAU ADA YANG MINTA DATA (GET) ===
-  // (Biasanya Website atau ESP32 ngecek status)
+  // === KALO ADA YANG MINTA DATA (GET) ===
+  // (website/esp32 ngecek status)
   if (req.method === 'GET') {
     try {
-      // Cari data sekat_1 di database
+      // cari data sekat_1 di database
       let alat = await Alat.findOne({ id_alat: id_target });
 
-      // Kalau belum ada (pertama kali jalan), kita bikinin otomatis
+      // kalo belum ada (pertama kali jalan), dibikinin otomatis
       if (!alat) {
         alat = await Alat.create({
           id_alat: id_target,
           nama: 'Sekat 1 (125 Bebek)',
-          berat_pakan: 20, // Default penuh
+          berat_pakan: 20, // default penuh
         });
       }
 
@@ -30,7 +30,7 @@ export default async function handler(req, res) {
     }
   }
 
-  // === KALAU ESP32 NGIRIM DATA BARU (POST) ===
+  // === KALO ESP32 NGIRIM DATA BARU (POST) ===
   else if (req.method === 'POST') {
     try {
       /* ESP32 bakal kirim data JSON kayak gini:
@@ -41,8 +41,8 @@ export default async function handler(req, res) {
       // Update datanya di database
       const alat = await Alat.findOneAndUpdate(
         { id_alat: id_target },
-        { berat_pakan: berat }, // Data berat diperbarui
-        { new: true, upsert: true } // Opsi biar kalo ga ada, dia bikin baru
+        { berat_pakan: berat }, // data berat diperbarui
+        { new: true, upsert: true } // opsi biar kalo ga ada, dia bikin baru
       );
 
       res.status(200).json({ success: true, data: alat });

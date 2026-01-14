@@ -7,20 +7,20 @@ export default function DetailAlat() {
   const router = useRouter();
   const { id } = router.query; 
 
-  // STATE: Buat nyimpen data asli dari database
+  // buat nyimpen data asli dari database
   const [dataAlat, setDataAlat] = useState(null);
   
-  // DATA JADWAL (Tetap Hardcode sesuai request)
+  // DATA JADWAL
   const jadwal = [
     { id: 1, waktu: '09:00', label: 'Pagi', jumlah: 7 }, 
     { id: 2, waktu: '15:00', label: 'Sore', jumlah: 8 }, 
   ];
 
-  // EFFEK: "Polling" (Nanya ke database tiap 2 detik)
+  // nanya ke database tiap 2 detik
   useEffect(() => {
     const ambilData = async () => {
       try {
-        const res = await fetch('/api/update'); // Nembak API yang lu buat tadi
+        const res = await fetch('/api/update'); // nembak API yang dibuat
         const json = await res.json();
         if (json.success) {
           setDataAlat(json.data);
@@ -30,15 +30,15 @@ export default function DetailAlat() {
       }
     };
 
-    ambilData(); // Ambil langsung pas dibuka
-    const interval = setInterval(ambilData, 2000); // Ulangi tiap 2 detik (Realtime)
+    ambilData(); // ambil langsung pas dibuka
+    const interval = setInterval(ambilData, 2000); // ngulang tiap 2 detik (realtime)
     
-    return () => clearInterval(interval); // Stop kalo pindah halaman
+    return () => clearInterval(interval); // stop kalo pindah halaman
   }, []);
 
   // PERHITUNGAN VISUAL
   const kapasitasMax = 20; 
-  // Kalau data belum masuk, anggap 0. Kalau udah ada, pake data dari DB.
+  // kalo data belum masuk, anggap 0. kalo udah ada, pake data dari DB.
   const sisaPakan = dataAlat ? dataAlat.berat_pakan : 0;  
   const persentase = (sisaPakan / kapasitasMax) * 100;
 
@@ -68,7 +68,7 @@ export default function DetailAlat() {
                 <div>
                     <h2 className="text-gray-500 text-sm mb-1">Lokasi</h2>
                     <p className="text-xl font-bold text-gray-800 uppercase">
-                        {/* Pake nama dari DB kalau ada, kalau belum loading... */}
+                        {/* pake nama dari DB kalau ada, kalo belum loading... */}
                         {dataAlat ? dataAlat.nama : 'Memuat data...'}
                     </p>
                 </div>
