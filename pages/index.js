@@ -5,10 +5,10 @@ import Link from 'next/link';
 export default function Dashboard() {
   // Data disesuaikan: Sekat 1 aktif, sisanya placeholder (Rencana Pengembangan)
   const [daftarAlat, setDaftarAlat] = useState([
-    { id: 'sekat_1', nama: 'Sekat 1 (125 Bebek)', berat: 18.5, status: 'online' }, // Penuh 20kg, kepakai dikit
-    { id: 'sekat_2', nama: 'Sekat 2 (125 Bebek)', berat: 0, status: 'offline' },
-    { id: 'sekat_3', nama: 'Sekat 3 (125 Bebek)', berat: 0, status: 'offline' },
-    { id: 'sekat_4', nama: 'Sekat 4 (125 Bebek)', berat: 0, status: 'offline' },
+    { id: 'sekat_1', nama: 'Sekat 1', berat: 18.5, status: 'online' }, // Penuh 20kg, kepakai dikit
+    { id: 'sekat_2', nama: 'Sekat 2', berat: 0, status: 'offline' },
+    { id: 'sekat_3', nama: 'Sekat 3', berat: 0, status: 'offline' },
+    { id: 'sekat_4', nama: 'Sekat 4', berat: 0, status: 'offline' },
   ]);
 
   return (

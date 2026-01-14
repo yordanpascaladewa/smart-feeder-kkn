@@ -45,7 +45,7 @@ export default function DetailAlat() {
   return (
     <div className="min-h-screen bg-gray-50 font-sans pb-10">
       <Head>
-        <title>Detail Kandang - Smart Feeder</title>
+        <title>Detail Kandang</title>
       </Head>
 
       {/* HEADER */}
