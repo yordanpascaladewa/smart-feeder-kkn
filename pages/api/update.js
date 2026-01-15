@@ -1,57 +1,37 @@
+// pages/api/update.js
 import dbConnect from '../../lib/db';
 import Alat from '../../models/alat';
 
 export default async function handler(req, res) {
-  // 1. konek ke database
   await dbConnect();
 
-  // id alat (sekat 1)
-  const id_target = 'sekat_1';
-
-  // === KALO ADA YANG MINTA DATA (GET) ===
-  // (website/esp32 ngecek status)
   if (req.method === 'GET') {
-    try {
-      // cari data sekat_1 di database
-      let alat = await Alat.findOne({ id_alat: id_target });
+    const { id, storage, ember } = req.query; // Baca parameter dari URL
 
-      // kalo belum ada (pertama kali jalan), dibikinin otomatis
-      if (!alat) {
-        alat = await Alat.create({
-          id_alat: id_target,
-          nama: 'Sekat 1 (125 Bebek)',
-          berat_pakan: 20, // default penuh
-        });
-      }
-
-      res.status(200).json({ success: true, data: alat });
-    } catch (error) {
-      res.status(400).json({ success: false });
+    if (!id) {
+        // Kalau cuma minta data (buat frontend)
+        return res.status(400).json({ success: false, message: 'ID missing' });
     }
-  }
 
-  // === KALO ESP32 NGIRIM DATA BARU (POST) ===
-  else if (req.method === 'POST') {
+    // Kalau ada data berat (dari ESP32), kita update
+    let updateData = { last_seen: new Date() };
+    
+    if (storage) updateData.berat_storage = parseFloat(storage);
+    if (ember) updateData.berat_ember = parseFloat(ember);
+
     try {
-      /* ESP32 bakal kirim data JSON kayak gini:
-         { "berat": 18.5 }
-      */
-      const { berat } = req.body;
-
-      // Update datanya di database
+      // Update atau Create kalau belum ada
       const alat = await Alat.findOneAndUpdate(
-        { id_alat: id_target },
-        { berat_pakan: berat }, // data berat diperbarui
-        { new: true, upsert: true } // opsi biar kalo ga ada, dia bikin baru
+        { id_alat: id },
+        updateData,
+        { new: true, upsert: true } // upsert: true = kalau gak ada, bikin baru
       );
-
+      
       res.status(200).json({ success: true, data: alat });
     } catch (error) {
-      res.status(400).json({ success: false });
+      res.status(400).json({ success: false, error: error.message });
     }
-  } 
-  
-  else {
-    res.status(405).json({ message: 'Method tidak diizinkan' });
+  } else {
+    res.status(405).json({ message: 'Method not allowed' });
   }
 }
