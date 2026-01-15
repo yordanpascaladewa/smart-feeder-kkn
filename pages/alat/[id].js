@@ -11,8 +11,8 @@ export default function DetailAlat() {
   
   // Data Jadwal (Simulasi)
   const jadwal = [
-    { id: 1, waktu: '07:00', label: 'Pagi', jumlah: 5, done: true }, 
-    { id: 2, waktu: '16:00', label: 'Sore', jumlah: 5, done: false }, 
+    { id: 1, waktu: '09.00', label: 'Pagi', jumlah: 7, done: true }, 
+    { id: 2, waktu: '15:00', label: 'Sore', jumlah: 8, done: false }, 
   ];
 
   // Ambil Data Realtime
@@ -44,7 +44,7 @@ export default function DetailAlat() {
   return (
     <div className="min-h-screen bg-gray-50 font-sans pb-10">
       <Head>
-        <title>Detail Kandang - Smart Feeder</title>
+        <title>Detail Kandang - Peternakan BUMDes</title>
       </Head>
 
       {/* HEADER HIJAU */}
@@ -100,7 +100,7 @@ export default function DetailAlat() {
                         <span className="text-xs text-gray-400">Kg Tersedia</span>
                     </div>
                 </div>
-                <p className="text-sm text-gray-500">Kapasitas Tong: <b>{kapasitasMax} Kg</b></p>
+                <p className="text-sm text-gray-500">Kapasitas Pakan: <b>{kapasitasMax} Kg</b></p>
             </div>
         </div>
 
@@ -115,7 +115,7 @@ export default function DetailAlat() {
                         </div>
                         <div>
                             <p className="font-bold text-gray-800">Jatah {item.label}</p>
-                            <p className="text-xs text-gray-400">{item.jumlah} Kg Konsentrat</p>
+                            <p className="text-xs text-gray-400">{item.jumlah} Kg</p>
                         </div>
                     </div>
                     {item.done ? (

@@ -8,7 +8,7 @@ export default function Home() {
       id: 'sekat_1',
       nama: 'Kandang Sekat 1',
       populasi: 125, // Sesuai request
-      sisa: 18.5,    // Nanti ini idealnya ambil dari database, skrg hardcode visual dulu
+      sisa: 20,    // Nanti ini idealnya ambil dari database, skrg hardcode visual dulu
       kapasitas: 20,
       status: 'normal',
       aktif: true,   // Penanda kandang aktif
@@ -46,7 +46,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50 font-sans pb-20">
       <Head>
-        <title>Dashboard - Smart Feeder</title>
+        <title>PETERNAKAN BUMDes</title>
       </Head>
 
       {/* HEADER GRADASI */}
@@ -57,8 +57,8 @@ export default function Home() {
 
         <div className="relative z-10 flex justify-between items-start mb-6">
           <div>
-            <p className="text-emerald-100 text-sm font-medium mb-1">Assalamualaikum,</p>
-            <h1 className="text-white text-3xl font-bold tracking-tight">Pak Nuryadi</h1>
+            <p className="text-emerald-100 text-sm font-medium mb-1">Selamat datang,</p>
+            <h1 className="text-white text-3xl font-bold tracking-tight">Peternak BUMDes</h1>
           </div>
           <div className="bg-white/20 p-2.5 rounded-2xl backdrop-blur-md border border-white/10 shadow-lg">
              {/* Icon User */}
