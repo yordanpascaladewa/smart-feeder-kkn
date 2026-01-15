@@ -1,4 +1,3 @@
-// pages/api/trigger.js
 import dbConnect from '../../lib/db';
 import Alat from '../../models/alat';
 
@@ -6,14 +5,19 @@ export default async function handler(req, res) {
   if (req.method === 'POST') {
     await dbConnect();
 
-    const { id } = req.body;
+    // Terima ID dan JUMLAH (kg) dari frontend
+    const { id, kg } = req.body;
 
     try {
-      // Kita update status 'motor' jadi 1 (ON)
-      // Pastikan di database nanti ada field 'motor' atau sesuaikan namanya
+      // Update database: 
+      // 1. Set motor = 1 (Nyala)
+      // 2. Set target_manual = kg (Berapa banyak mau dikeluarin)
       const alat = await Alat.findOneAndUpdate(
-        { id_alat: id }, // Cari alat berdasarkan ID (misal: sekat_1)
-        { motor: 1 },    // Ubah status motor jadi 1
+        { id_alat: id }, 
+        { 
+            motor: 1,
+            target_manual: kg  // Pastikan nanti di ESP32 baca field ini
+        },    
         { new: true }
       );
 
