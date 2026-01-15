@@ -5,7 +5,7 @@ import Link from 'next/link';
 export default function Dashboard() {
   // data disesuaikan: sekat 1 aktif, sisanya placeholder (rencana pengembangan)
   const [daftarAlat, setDaftarAlat] = useState([
-    { id: 'sekat_1', nama: 'Sekat 1', berat: 18.5, status: 'online' }, // penuh 20kg, kepake dikit
+    { id: 'sekat_1', nama: 'Sekat 1', berat: 20, status: 'online' }, // penuh 20kg, kepake dikit
     { id: 'sekat_2', nama: 'Sekat 2', berat: 0, status: 'offline' },
     { id: 'sekat_3', nama: 'Sekat 3', berat: 0, status: 'offline' },
     { id: 'sekat_4', nama: 'Sekat 4', berat: 0, status: 'offline' },
