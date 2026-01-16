@@ -137,7 +137,7 @@ export default function DetailAlat() {
                         <div className="flex-1 bg-gray-50 rounded-xl h-10 flex items-center justify-center border border-gray-200">
                             <input type="number" value={inputKg} onChange={(e) => setInputKg(parseFloat(e.target.value))} className="bg-transparent text-center font-bold text-gray-800 w-full outline-none"/>
                         </div>
-                        <button onClick={() => setInputKg(prev => prev + 1)} className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 font-bold hover:bg-emerald-200">+</button>
+                        <button onClick={() => setInputKg(prev => prev + 0.5)} className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 font-bold hover:bg-emerald-200">+</button>
                     </div>
                 </div>
 
