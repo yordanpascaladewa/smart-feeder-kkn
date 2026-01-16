@@ -2,36 +2,35 @@ import Head from 'next/head';
 import Link from 'next/link';
 
 export default function Home() {
-  // CONFIGURASI DATA KANDANG
   const daftarAlat = [
     {
-      id: 'sekat_1',
+      id: 'Sekat 1',
       nama: 'Kandang Sekat 1',
       populasi: 125, // Sesuai request
       sisa: 20,    // Nanti ini idealnya ambil dari database, skrg hardcode visual dulu
       kapasitas: 20,
-      status: 'normal',
+      status: 'Normal',
       aktif: true,   // Penanda kandang aktif
     },
     {
-      id: 'sekat_2',
+      id: 'Sekat 2',
       nama: 'Kandang Sekat 2',
       populasi: 0,
-      status: 'offline',
+      status: 'Offline',
       aktif: false,  // Kandang belum dipasang
     },
     {
-      id: 'sekat_3',
+      id: 'Sekat 3',
       nama: 'Kandang Sekat 3',
       populasi: 0,
-      status: 'offline',
+      status: 'Offline',
       aktif: false,
     },
     {
-      id: 'sekat_4',
+      id: 'Sekat 4',
       nama: 'Kandang Sekat 4',
       populasi: 0,
-      status: 'offline',
+      status: 'Offline',
       aktif: false,
     },
   ];
@@ -147,7 +146,7 @@ export default function Home() {
                     </div>
                     <div>
                         <h3 className="font-bold text-gray-800 text-lg">{alat.nama}</h3>
-                        <p className="text-gray-400 text-xs font-medium italic">Belum terpasang</p>
+                        <p className="text-gray-400 text-xs font-medium italic">Alat belum terpasang</p>
                     </div>
                  </div>
               </div>
