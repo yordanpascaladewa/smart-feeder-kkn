@@ -29,8 +29,8 @@ export default function DetailAlat() {
 
   // JADWAL PAKAN (Updated Sesuai Request)
   const jadwal = [
-    { id: 1, waktu: '09:00 WIB', label: 'Pagi', jumlah: 7, done: true },
-    { id: 2, waktu: '15:00 WIB', label: 'Sore', jumlah: 8, done: false },
+    { id: 1, waktu: '09:00', label: 'Pagi', jumlah: 7, done: true },
+    { id: 2, waktu: '15:00', label: 'Sore', jumlah: 8, done: false },
   ];
 
   // Update selectedSekat kalau ID URL berubah
