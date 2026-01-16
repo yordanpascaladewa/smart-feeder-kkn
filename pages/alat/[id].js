@@ -133,7 +133,7 @@ export default function DetailAlat() {
                 <div className="mb-5">
                     <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Target Pakan (Kg)</label>
                     <div className="flex items-center gap-4">
-                        <button onClick={() => setInputKg(prev => Math.max(0.1, prev - 0.1))} className="w-10 h-10 rounded-xl bg-gray-100 font-bold hover:bg-gray-200">-</button>
+                        <button onClick={() => setInputKg(prev => Math.max(1, prev - 0.5))} className="w-10 h-10 rounded-xl bg-gray-100 font-bold hover:bg-gray-200">-</button>
                         <div className="flex-1 bg-gray-50 rounded-xl h-10 flex items-center justify-center border border-gray-200">
                             <input type="number" value={inputKg} onChange={(e) => setInputKg(parseFloat(e.target.value))} className="bg-transparent text-center font-bold text-gray-800 w-full outline-none"/>
                         </div>
