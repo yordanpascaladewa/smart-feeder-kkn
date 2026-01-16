@@ -21,16 +21,16 @@ export default function DetailAlat() {
 
   // Config Dummy Status Sekat
   const listSekat = [
-    { id: 'sekat_1', label: 'Sekat 1', active: true },
-    { id: 'sekat_2', label: 'Sekat 2', active: false }, 
-    { id: 'sekat_3', label: 'Sekat 3', active: false }, 
-    { id: 'sekat_4', label: 'Sekat 4', active: false }, 
+    { id: 'Sekat 1', label: 'Sekat 1', active: true },
+    { id: 'Sekat 2', label: 'Sekat 2', active: false }, 
+    { id: 'Sekat 3', label: 'Sekat 3', active: false }, 
+    { id: 'Sekat 4', label: 'Sekat 4', active: false }, 
   ];
 
   // JADWAL PAKAN (Updated Sesuai Request)
   const jadwal = [
-    { id: 1, waktu: '09:00', label: 'Pagi', jumlah: 7, done: true }, // 7 Kg
-    { id: 2, waktu: '15:00', label: 'Sore', jumlah: 8, done: false }, // 8 Kg
+    { id: 1, waktu: '09:00 WIB', label: 'Pagi', jumlah: 7, done: true },
+    { id: 2, waktu: '15:00 WIB', label: 'Sore', jumlah: 8, done: false },
   ];
 
   // Update selectedSekat kalau ID URL berubah
@@ -107,8 +107,8 @@ export default function DetailAlat() {
 
   // HITUNGAN VISUAL
   // 1. Storage
-  const maxStorage = 50; 
-  const beratStorage = dataAlat ? dataAlat.berat_storage : 45; 
+  const maxStorage = 20; 
+  const beratStorage = dataAlat ? dataAlat.berat_storage : 20; 
   const persenStorage = (beratStorage / maxStorage) * 100;
 
   // 2. Ember (Pake logika: Kalo simulasi jalan, pake data simulasi. Kalo enggak, pake data DB)
@@ -119,7 +119,7 @@ export default function DetailAlat() {
   return (
     <div className="min-h-screen bg-gray-50 font-sans pb-10">
       <Head>
-        <title>Detail Kandang - Smart Feeder</title>
+        <title>Detail Kandang</title>
       </Head>
 
       {/* --- POPUP MODAL --- */}
@@ -128,16 +128,16 @@ export default function DetailAlat() {
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowModal(false)}></div>
             <div className="bg-white rounded-3xl w-full max-w-sm p-6 relative z-10 animate-bounce-in shadow-2xl">
                 <h3 className="text-xl font-bold text-gray-800 mb-1">Beri Pakan Manual</h3>
-                <p className="text-gray-400 text-sm mb-6">Simulasi pengisian ember pakan.</p>
+                <p className="text-gray-400 text-sm mb-6">Pengisian ember pakan</p>
                 
                 <div className="mb-5">
                     <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Target Pakan (Kg)</label>
                     <div className="flex items-center gap-4">
-                        <button onClick={() => setInputKg(prev => Math.max(0.1, prev - 0.5))} className="w-10 h-10 rounded-xl bg-gray-100 font-bold hover:bg-gray-200">-</button>
+                        <button onClick={() => setInputKg(prev => Math.max(0.1, prev - 0.1))} className="w-10 h-10 rounded-xl bg-gray-100 font-bold hover:bg-gray-200">-</button>
                         <div className="flex-1 bg-gray-50 rounded-xl h-10 flex items-center justify-center border border-gray-200">
                             <input type="number" value={inputKg} onChange={(e) => setInputKg(parseFloat(e.target.value))} className="bg-transparent text-center font-bold text-gray-800 w-full outline-none"/>
                         </div>
-                        <button onClick={() => setInputKg(prev => prev + 0.5)} className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 font-bold hover:bg-emerald-200">+</button>
+                        <button onClick={() => setInputKg(prev => prev + 0.1)} className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 font-bold hover:bg-emerald-200">+</button>
                     </div>
                 </div>
 
@@ -165,7 +165,7 @@ export default function DetailAlat() {
         {/* KARTU 1: STORAGE UTAMA */}
         <div className="bg-white p-5 rounded-3xl shadow-lg border border-gray-100 flex items-center justify-between">
             <div>
-                <h2 className="text-gray-400 text-[10px] font-bold uppercase tracking-wider">Silo / Gudang Utama</h2>
+                <h2 className="text-gray-400 text-[10px] font-bold uppercase tracking-wider">Storage Pakan</h2>
                 <p className="text-3xl font-bold text-gray-800">{beratStorage} <span className="text-sm text-gray-400 font-normal">Kg</span></p>
                 <div className="flex items-center gap-1 mt-1">
                     <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
@@ -199,7 +199,7 @@ export default function DetailAlat() {
                     <div>
                         <h2 className="text-orange-600/70 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3"><path d="M10 2a.75.75 0 01.75.75v1.5H18a.75.75 0 01.75.75v5.5a.75.75 0 01-.75.75h-1.5v5a2 2 0 01-2 2h-9a2 2 0 01-2-2v-5H2a.75.75 0 01-.75-.75V5a.75.75 0 01.75-.75h7.25v-1.5A.75.75 0 0110 2z" /></svg>
-                            Ember Penakar
+                            Ember Pakan
                         </h2>
                         {/* ANGKA UTAMA */}
                         <p className={`text-4xl font-black mt-1 transition-all ${isSimulating ? 'text-orange-600 scale-110 origin-left' : 'text-gray-800'}`}>
