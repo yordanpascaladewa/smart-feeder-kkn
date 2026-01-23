@@ -31,14 +31,14 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center p-4">
-      <Head><title>Login Peternak</title></Head>
+      <Head><title>Login</title></Head>
 
       {/* Container Kaca */}
       <div className="bg-white/20 backdrop-blur-lg border border-white/30 p-8 rounded-[2rem] shadow-2xl w-full max-w-md">
         
         <div className="text-center mb-8">
           <h1 className="text-3xl font-black text-white tracking-tight">Selamat Datang</h1>
-          <p className="text-emerald-100 text-sm mt-1">Silakan masuk untuk akses kontrol</p>
+          <p className="text-emerald-100 text-sm mt-1">Silakan masuk</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-6">
@@ -49,7 +49,7 @@ export default function Login() {
             <input 
               type="text" 
               className="w-full mt-1 px-4 py-3 rounded-xl bg-white/90 border-0 text-emerald-900 font-bold focus:ring-4 focus:ring-emerald-300 transition-all placeholder:text-emerald-300/50"
-              placeholder="admin"
+              placeholder="masukkan username anda"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
             />
