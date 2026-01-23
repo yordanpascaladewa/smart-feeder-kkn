@@ -37,7 +37,7 @@ export default function DetailAlat() {
   const kapasitasMax = 50.0; // Anggap gudang penuh di 50kg (Buat visual bar)
   
   const isBahaya = data.berat_storage < batasAman;
-  const persentase = Math.min((data.berat_storage / kapasitasMax) * 100, 100); // Max 100%
+  const persentase = Math.min((data.berat_storage / kapasitasMax) * 100, 100); 
 
   return (
     <div className={`min-h-screen transition-all duration-700 ease-in-out flex flex-col items-center justify-center p-4 md:p-8
@@ -47,7 +47,7 @@ export default function DetailAlat() {
         <title>Smart Storage Monitor</title>
       </Head>
 
-      {/* CONTAINER UTAMA (Lebar Maksimal di Laptop 4XL) */}
+      {/* CONTAINER UTAMA */}
       <main className="w-full max-w-4xl bg-white/60 backdrop-blur-xl rounded-[2.5rem] shadow-2xl border border-white/50 p-6 md:p-12 overflow-hidden relative">
         
         {/* Hiasan Background Blobs */}
@@ -96,17 +96,11 @@ export default function DetailAlat() {
               ${isBahaya ? 'bg-red-500 text-white shadow-lg shadow-red-500/30' : 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30'}`}>
               {isBahaya ? (
                 <>
-                  <svg className="w-6 h-6 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                  </svg>
-                  <span>STOK KRITIS! ISI SEGERA</span>
+                  <span>⚠️ STOK KRITIS! ISI SEGERA</span>
                 </>
               ) : (
                 <>
-                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span>STOK AMAN TERKENDALI</span>
+                  <span>✅ STOK AMAN TERKENDALI</span>
                 </>
               )}
             </div>
@@ -120,20 +114,10 @@ export default function DetailAlat() {
                 ${isBahaya ? 'bg-gradient-to-t from-red-500 to-rose-400' : 'bg-gradient-to-t from-emerald-500 to-teal-400'}`}
               style={{ height: `${persentase}%`, minHeight: '10%' }}
             >
-              {/* Efek Gelombang simple */}
               <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
               <span className="relative text-white font-bold text-xl drop-shadow-md">
                 {Math.round(persentase)}%
               </span>
-            </div>
-            
-            {/* Grid Lines (Garis Takaran) */}
-            <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-4 opacity-30">
-               <div className="border-t border-gray-600 w-full text-right text-xs">Full</div>
-               <div className="border-t border-gray-600 w-full text-right text-xs">75%</div>
-               <div className="border-t border-gray-600 w-full text-right text-xs">50%</div>
-               <div className="border-t border-gray-600 w-full text-right text-xs">25%</div>
-               <div className="border-t border-gray-600 w-full text-right text-xs">Empty</div>
             </div>
           </div>
           
@@ -142,7 +126,7 @@ export default function DetailAlat() {
         {/* FOOTER */}
         <div className="mt-12 text-center border-t border-gray-200/50 pt-6">
           <p className="text-xs text-gray-400 font-mono">
-            Last Sync: {new Date().toLocaleTimeString()} • Server: Vercel Network
+            Last Sync: {new Date().toLocaleTimeString()}
           </p>
         </div>
 
