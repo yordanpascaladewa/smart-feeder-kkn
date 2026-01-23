@@ -1,7 +1,6 @@
-// pages/login.js
-import Head from 'next/head';
 import { useState } from 'react';
 import { useRouter } from 'next/router';
+import Head from 'next/head';
 
 export default function Login() {
   const router = useRouter();
@@ -10,88 +9,83 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async (e) => {
+  const handleLogin = (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
-    try {
-      const res = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
-      });
+    // --- SETTING USERNAME & PASSWORD DI SINI ---
+    const USER_BENAR = "peternakanbumdes";
+    const PASS_BENAR = "PonowarengMaju"; // Ganti sesuka hati
+    // -------------------------------------------
 
-      const data = await res.json();
-
-      if (data.success) {
-        router.push('/'); // Pindah ke Dashboard
-      } else {
-        setError('Username atau Password salah bro!');
-        setLoading(false);
-      }
-    } catch (err) {
-      setError('Ada masalah jaringan.');
+    if (username === USER_BENAR && password === PASS_BENAR) {
+      // Simpan "Tiket Masuk" di Cookies browser
+      document.cookie = "token=bolehmakan; path=/; max-age=86400"; // Berlaku 1 hari
+      router.push('/'); // Lempar ke Dashboard
+    } else {
+      setError('Username atau Password salah!');
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <Head>
-        <title>Login - Smart Feeder</title>
-      </Head>
+    <div className="min-h-screen bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center p-4">
+      <Head><title>Login Peternak</title></Head>
 
-      <div className="bg-white p-8 rounded-3xl shadow-xl w-full max-w-sm border border-gray-100">
+      {/* Container Kaca */}
+      <div className="bg-white/20 backdrop-blur-lg border border-white/30 p-8 rounded-[2rem] shadow-2xl w-full max-w-md">
+        
         <div className="text-center mb-8">
-            <div className="bg-emerald-100 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 text-emerald-600">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8">
-                    <path fillRule="evenodd" d="M12 1.5a5.25 5.25 0 00-5.25 5.25v3a3 3 0 00-3 3v6.75a3 3 0 003 3h10.5a3 3 0 003-3v-6.75a3 3 0 00-3-3v-3c0-2.9-2.35-5.25-5.25-5.25zm3.75 8.25v-3a3.75 3.75 0 10-7.5 0v3h7.5z" clipRule="evenodd" />
-                </svg>
-            </div>
-            <h1 className="text-2xl font-bold text-gray-800">Smart Feeder KKN</h1>
-            <p className="text-gray-400 text-sm">Masuk untuk akses kontrol.</p>
+          <h1 className="text-3xl font-black text-white tracking-tight">Selamat Datang</h1>
+          <p className="text-emerald-100 text-sm mt-1">Silakan masuk untuk akses kontrol</p>
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-4">
-            <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Username</label>
-                <input 
-                    type="text" 
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition"
-                    placeholder="admin"
-                    required
-                />
-            </div>
-            
-            <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Password</label>
-                <input 
-                    type="password" 
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition"
-                    placeholder="••••••••"
-                    required
-                />
-            </div>
+        <form onSubmit={handleLogin} className="space-y-6">
+          
+          {/* Input Username */}
+          <div>
+            <label className="text-emerald-50 text-xs font-bold uppercase tracking-wider ml-1">Username</label>
+            <input 
+              type="text" 
+              className="w-full mt-1 px-4 py-3 rounded-xl bg-white/90 border-0 text-emerald-900 font-bold focus:ring-4 focus:ring-emerald-300 transition-all placeholder:text-emerald-300/50"
+              placeholder="admin"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+          </div>
 
-            {error && (
-                <div className="bg-red-50 text-red-500 text-sm p-3 rounded-xl text-center font-medium border border-red-100">
-                    {error}
-                </div>
-            )}
+          {/* Input Password */}
+          <div>
+            <label className="text-emerald-50 text-xs font-bold uppercase tracking-wider ml-1">Password</label>
+            <input 
+              type="password" 
+              className="w-full mt-1 px-4 py-3 rounded-xl bg-white/90 border-0 text-emerald-900 font-bold focus:ring-4 focus:ring-emerald-300 transition-all placeholder:text-emerald-300/50"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
 
-            <button 
-                type="submit" 
-                disabled={loading}
-                className="w-full bg-emerald-600 text-white font-bold py-3 rounded-xl hover:bg-emerald-700 transition shadow-lg shadow-emerald-200 active:scale-95"
-            >
-                {loading ? 'Mengecek...' : 'MASUK SEKARANG'}
-            </button>
+          {/* Error Message */}
+          {error && (
+            <div className="bg-red-500/80 text-white text-sm font-bold px-4 py-2 rounded-lg text-center animate-pulse">
+              ⚠️ {error}
+            </div>
+          )}
+
+          <button 
+            type="submit" 
+            disabled={loading}
+            className="w-full py-4 bg-emerald-800 hover:bg-emerald-900 text-white font-black rounded-xl shadow-lg transition-all active:scale-95">
+            {loading ? 'MEMERIKSA...' : 'MASUK SEKARANG'}
+          </button>
         </form>
+
+        <p className="text-center text-emerald-200/60 text-xs mt-6">
+          Sistem Monitoring Pakan BUMDes &copy; 2026
+        </p>
+
       </div>
     </div>
   );

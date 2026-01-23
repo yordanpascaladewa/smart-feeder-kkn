@@ -16,7 +16,7 @@ export default function DetailAlat() {
   });
 
   const handleManualFeed = async () => {
-    if (!manualBerat || manualBerat <= 0) return alert("Masukkan berat pakan!");
+    if (!manualBerat || manualBerat <= 0) return alert("Masukkan jumlah pakan!");
     setLoadingManual(true);
     try {
       const res = await fetch('/api/trigger', {
@@ -24,7 +24,7 @@ export default function DetailAlat() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id_alat: id, berat: manualBerat }),
       });
-      if (res.ok) { alert(`✅ Perintah: ${manualBerat} Gram`); setManualBerat(''); }
+      if (res.ok) { alert(`✅ Perintah Terkirim: ${manualBerat} Kg`); setManualBerat(''); }
     } catch (err) { alert("Error koneksi."); }
     setLoadingManual(false);
   };
@@ -33,23 +33,23 @@ export default function DetailAlat() {
   const data = result?.data; 
   if (!data) return <div className="min-h-screen flex items-center justify-center bg-gray-100 text-red-500 font-bold text-sm">ALAT TIDAK DITEMUKAN</div>;
 
-  // --- LOGIKA GRAM ---
-  const batasAman = 7000;   
-  const kapasitasMax = 50000; 
+  // --- KEMBALI KE KILOGRAM (KG) ---
+  const batasAman = 7.0;    // 7 Kg
+  const kapasitasMax = 50.0; // 50 Kg
+  
   const isBahaya = data.berat_storage < batasAman;
   const persentase = Math.min((data.berat_storage / kapasitasMax) * 100, 100); 
 
   return (
-    // WRAPPER UTAMA: Flex Center untuk menengahkan konten secara vertikal & horizontal
     <div className={`min-h-screen w-full transition-all duration-700 ease-in-out p-4 flex items-center justify-center
       ${isBahaya ? 'bg-gradient-to-br from-red-50 via-red-100 to-rose-200' : 'bg-gradient-to-br from-emerald-50 via-teal-100 to-cyan-200'}`}>
       
       <Head><title>Smart Control Panel</title></Head>
 
-      <main className="w-full max-w-lg md:max-w-4xl space-y-6">
+      <main className="w-full max-w-lg md:max-w-4xl space-y-5">
         
-        {/* === MONITORING STORAGE === */}
-        <div className="relative w-full bg-white/60 backdrop-blur-xl rounded-[2rem] shadow-2xl border border-white/50 p-6 md:p-10 overflow-hidden">
+        {/* === MONITORING STORAGE (KG) === */}
+        <div className="relative w-full bg-white/60 backdrop-blur-xl rounded-[2rem] shadow-2xl border border-white/50 p-6 md:p-8 overflow-hidden">
             <div className={`absolute -top-20 -right-20 w-40 h-40 md:w-64 md:h-64 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob ${isBahaya ? 'bg-red-300' : 'bg-green-300'}`}></div>
 
             <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
@@ -57,17 +57,16 @@ export default function DetailAlat() {
                     <h1 className="text-xl md:text-3xl font-black text-gray-800 tracking-tight">GUDANG PAKAN</h1>
                     <p className="text-xs font-mono text-gray-500 mb-4 bg-white/50 px-2 py-1 rounded inline-block">ID: {data.id_alat}</p>
                     
-                    <div className="flex items-baseline justify-center md:justify-start gap-2 mb-4">
-                        {/* Ukuran font disesuaikan biar ga kepotong di HP */}
+                    <div className="flex items-baseline justify-center md:justify-start gap-2 mb-2">
                         <span className={`text-6xl md:text-8xl font-black tracking-tighter ${isBahaya ? 'text-red-600' : 'text-gray-800'}`}>
                             {data.berat_storage}
                         </span>
-                        <span className="text-xl md:text-2xl text-gray-400 font-bold">Gram</span>
+                        <span className="text-xl md:text-2xl text-gray-400 font-bold">Kg</span>
                     </div>
 
                     <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg font-bold text-xs shadow-sm transition-all
                         ${isBahaya ? 'bg-red-500 text-white' : 'bg-emerald-500 text-white'}`}>
-                        {isBahaya ? '⚠️ KRITIS' : '✅ AMAN'}
+                        {isBahaya ? '⚠️ KRITIS (< 7 Kg)' : '✅ AMAN'}
                     </div>
                 </div>
 
@@ -82,28 +81,66 @@ export default function DetailAlat() {
             </div>
         </div>
 
-        {/* === TOMBOL KONTROL === */}
-        <div className="bg-white/70 backdrop-blur-lg rounded-[2rem] p-6 shadow-xl border border-white/40">
-            <div className="flex items-center justify-center gap-2 mb-4">
-                <span className="text-lg">⚡</span>
-                <h2 className="text-lg font-black text-gray-800">Kontrol Manual</h2>
-            </div>
+        {/* === GRID BAWAH: MANUAL & JADWAL === */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             
-            <div className="flex flex-col gap-3">
-                <input 
-                    type="number" 
-                    placeholder="Masukkan Gram..." 
-                    value={manualBerat}
-                    onChange={(e) => setManualBerat(e.target.value)}
-                    className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-xl font-bold text-center text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-300 transition-all placeholder:text-sm"
-                />
-                <button 
-                    onClick={handleManualFeed}
-                    disabled={loadingManual}
-                    className="w-full py-3 rounded-xl font-bold text-white bg-gradient-to-r from-orange-400 to-red-400 hover:from-orange-500 hover:to-red-500 shadow-md active:scale-95 transition-transform text-sm">
-                    {loadingManual ? 'MENGIRIM...' : 'BERI PAKAN SEKARANG'}
-                </button>
+            {/* KARTU 1: FEEDING MANUAL */}
+            <div className="bg-white/70 backdrop-blur-lg rounded-[2rem] p-6 shadow-xl border border-white/40">
+                <div className="flex items-center gap-2 mb-4">
+                    <div className="p-2 bg-orange-100 rounded-lg text-orange-600">⚡</div>
+                    <h2 className="text-base font-black text-gray-800">Isi Manual (Kg)</h2>
+                </div>
+                <div className="flex flex-col gap-3">
+                    <input 
+                        type="number" 
+                        placeholder="0.0" 
+                        value={manualBerat}
+                        onChange={(e) => setManualBerat(e.target.value)}
+                        className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-2xl font-bold text-center text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-300 transition-all placeholder:text-gray-300"
+                    />
+                    <button 
+                        onClick={handleManualFeed}
+                        disabled={loadingManual}
+                        className="w-full py-3 rounded-xl font-bold text-white bg-gradient-to-r from-orange-400 to-red-400 hover:from-orange-500 hover:to-red-500 shadow-md active:scale-95 transition-transform text-xs md:text-sm uppercase tracking-wider">
+                        {loadingManual ? 'Mengirim...' : 'Kirim Perintah'}
+                    </button>
+                </div>
             </div>
+
+            {/* KARTU 2: JADWAL OTOMATIS */}
+            <div className="bg-white/70 backdrop-blur-lg rounded-[2rem] p-6 shadow-xl border border-white/40">
+                <div className="flex items-center gap-2 mb-4">
+                    <div className="p-2 bg-blue-100 rounded-lg text-blue-600">🕒</div>
+                    <h2 className="text-base font-black text-gray-800">Jadwal Pakan</h2>
+                </div>
+                
+                <div className="space-y-3">
+                    {/* Jadwal Pagi */}
+                    <div className="flex justify-between items-center p-3 bg-white/60 rounded-xl border border-white/50">
+                        <div>
+                            <span className="text-[10px] font-bold bg-blue-100 text-blue-600 px-2 py-0.5 rounded">PAGI</span>
+                            <p className="text-xl font-black text-gray-700 mt-1">07:00</p>
+                        </div>
+                        <div className="text-right">
+                            <p className="text-xs text-gray-400 font-bold uppercase">Target</p>
+                            <p className="text-lg font-bold text-gray-600">7.0 <span className="text-xs">Kg</span></p>
+                        </div>
+                    </div>
+
+                    {/* Jadwal Sore */}
+                    <div className="flex justify-between items-center p-3 bg-white/60 rounded-xl border border-white/50">
+                        <div>
+                            <span className="text-[10px] font-bold bg-purple-100 text-purple-600 px-2 py-0.5 rounded">SORE</span>
+                            <p className="text-xl font-black text-gray-700 mt-1">16:00</p>
+                        </div>
+                        <div className="text-right">
+                            <p className="text-xs text-gray-400 font-bold uppercase">Target</p>
+                            <p className="text-lg font-bold text-gray-600">8.0 <span className="text-xs">Kg</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
       </main>
