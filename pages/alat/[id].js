@@ -96,11 +96,11 @@ export default function DetailAlat() {
               ${isBahaya ? 'bg-red-500 text-white shadow-lg shadow-red-500/30' : 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30'}`}>
               {isBahaya ? (
                 <>
-                  <span>⚠️ STOK KRITIS! ISI SEGERA</span>
+                  <span>⚠️ Stok Tidak Aman</span>
                 </>
               ) : (
                 <>
-                  <span>✅ STOK AMAN TERKENDALI</span>
+                  <span>✅ Stok Aman</span>
                 </>
               )}
             </div>

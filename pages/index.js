@@ -2,158 +2,135 @@ import Head from 'next/head';
 import Link from 'next/link';
 
 export default function Home() {
-  const daftarAlat = [
-    {
-      id: 'Sekat 1',
-      nama: 'Kandang Sekat 1',
-      populasi: 125, // Sesuai request
-      sisa: 20,    // Nanti ini idealnya ambil dari database, skrg hardcode visual dulu
-      kapasitas: 20,
-      status: 'Normal',
-      aktif: true,   // Penanda kandang aktif
-    },
-    {
-      id: 'Sekat 2',
-      nama: 'Kandang Sekat 2',
-      populasi: 0,
-      status: 'Offline',
-      aktif: false,  // Kandang belum dipasang
-    },
-    {
-      id: 'Sekat 3',
-      nama: 'Kandang Sekat 3',
-      populasi: 0,
-      status: 'Offline',
-      aktif: false,
-    },
-    {
-      id: 'Sekat 4',
-      nama: 'Kandang Sekat 4',
-      populasi: 0,
-      status: 'Offline',
-      aktif: false,
-    },
-  ];
-
-  const getBarColor = (sisa, kapasitas) => {
-    const persen = (sisa / kapasitas) * 100;
-    if (persen > 50) return 'bg-emerald-500';
-    if (persen > 20) return 'bg-yellow-500';
-    return 'bg-red-500';
-  };
+  // (Nanti di sini bisa ditambah SWR buat fetch status semua kandang sekaligus)
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans pb-20">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-100 to-cyan-200 p-4 md:p-8 overflow-hidden relative flex justify-center items-center">
       <Head>
-        <title>PETERNAKAN BUMDes</title>
+        <title>Dashboard Peternakan BUMDes</title>
+        <meta name="description" content="Monitor Pakan Ternak" />
+        <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      {/* HEADER GRADASI */}
-      <div className="bg-gradient-to-br from-emerald-600 to-teal-700 px-6 pt-12 pb-24 rounded-b-[3rem] shadow-xl relative overflow-hidden">
-        {/* Hiasan Background (Lingkaran transparan) */}
-        <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-10 -mt-10 blur-2xl"></div>
-        <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/10 rounded-full -ml-10 -mb-10 blur-xl"></div>
+      {/* --- ANIMASI BACKGROUND BLOBS --- */}
+      <div className="absolute top-0 -left-4 w-96 h-96 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob"></div>
+      <div className="absolute top-0 -right-4 w-96 h-96 bg-yellow-300 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob animation-delay-2000"></div>
+      <div className="absolute -bottom-32 left-20 w-96 h-96 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob animation-delay-4000"></div>
 
-        <div className="relative z-10 flex justify-between items-start mb-6">
-          <div>
-            <p className="text-emerald-100 text-sm font-medium mb-1">Selamat datang,</p>
-            <h1 className="text-white text-3xl font-bold tracking-tight">Peternak BUMDes</h1>
-          </div>
-          <div className="bg-white/20 p-2.5 rounded-2xl backdrop-blur-md border border-white/10 shadow-lg">
-             {/* Icon User */}
-             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-white">
-              <path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clipRule="evenodd" />
-            </svg>
-          </div>
-        </div>
-        
-        {/* RINGKASAN GLOBAL */}
-        <div className="grid grid-cols-2 gap-4">
-            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20">
-                <p className="text-emerald-100 text-xs mb-1">Total Populasi</p>
-                <p className="text-white font-bold text-2xl">125 <span className="text-sm font-normal opacity-80">Ekor</span></p>
-            </div>
-             <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20">
-                <p className="text-emerald-100 text-xs mb-1">Status Sistem</p>
-                <div className="flex items-center gap-2">
-                    <span className="relative flex h-3 w-3">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-3 w-3 bg-green-400"></span>
-                    </span>
-                    <p className="text-white font-bold text-lg">Online</p>
+      {/* --- CONTAINER KACA UTAMA --- */}
+      <main className="relative z-10 w-full max-w-5xl bg-white/40 backdrop-blur-xl rounded-[3rem] shadow-2xl border border-white/30 overflow-hidden">
+         <div className="p-8 md:p-12 h-full overflow-y-auto">
+            
+            {/* HEADER DASHBOARD */}
+            <header className="mb-12 flex flex-col md:flex-row justify-between items-center text-center md:text-left gap-6">
+                <div>
+                    <h1 className="text-4xl md:text-5xl font-black text-gray-800 tracking-tight mb-2">
+                        Peternak <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500">BUMDes</span>
+                    </h1>
+                    <p className="text-lg text-gray-600 font-medium font-mono">
+                        Sistem Monitoring Pakan Terintegrasi
+                    </p>
                 </div>
-            </div>
-        </div>
-      </div>
-
-      {/* LIST KANDANG */}
-      <div className="px-6 -mt-12 relative z-20 space-y-5">
-        <h2 className="text-gray-800 font-bold text-lg ml-1">Monitoring Kandang</h2>
-        
-        {daftarAlat.map((alat) => {
-          // Kalo kandang AKTIF (Sekat 1)
-          if (alat.aktif) {
-            const persentase = (alat.sisa / alat.kapasitas) * 100;
-            return (
-              <Link href={`/alat/${alat.id}`} key={alat.id}>
-                <div className="bg-white p-5 rounded-3xl shadow-lg shadow-gray-200/50 border border-gray-100 active:scale-[0.98] transition-transform duration-200 cursor-pointer group">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex items-center gap-3">
-                        <div className="bg-emerald-100 p-3 rounded-2xl text-emerald-600">
-                             {/* Icon Kandang */}
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
-                                <path d="M19.006 3.705a.75.75 0 00-.512-1.41L6 6.838V3a.75.75 0 00-.75-.75h-1.5A.75.75 0 003 3v4.93l-1.006.365a.75.75 0 00.512 1.41l16.5-6z" />
-                                <path fillRule="evenodd" d="M3.019 11.114L18 5.667v3.421l4.006 1.457a.75.75 0 11-.512 1.41l-.494-.18v8.475h.75a.75.75 0 010 1.5H2.25a.75.75 0 010-1.5H3v-9.129l.019-.007zM18 20.25v-9.566l1.5.546v9.02H18zM6.6 20.25h1.5a.75.75 0 000-1.5h-1.5a.75.75 0 000 1.5zM6.6 16.5h1.5a.75.75 0 000-1.5h-1.5a.75.75 0 000 1.5zM10.5 20.25h1.5a.75.75 0 000-1.5h-1.5a.75.75 0 000 1.5zM10.5 16.5h1.5a.75.75 0 000-1.5h-1.5a.75.75 0 000 1.5zM14.4 20.25h1.5a.75.75 0 000-1.5h-1.5a.75.75 0 000 1.5zM14.4 16.5h1.5a.75.75 0 000-1.5h-1.5a.75.75 0 000 1.5z" clipRule="evenodd" />
-                            </svg>
-                        </div>
-                        <div>
-                            <h3 className="font-bold text-gray-800 text-lg">{alat.nama}</h3>
-                            <p className="text-gray-400 text-xs font-medium">{alat.populasi} Ekor Bebek</p>
-                        </div>
-                    </div>
-                    <div className="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2.5 py-1 rounded-full border border-emerald-100">
-                        AMAN
-                    </div>
-                  </div>
-
-                  {/* Indikator Pakan */}
-                  <div className="bg-gray-50 rounded-2xl p-4">
-                    <div className="flex justify-between text-sm mb-2">
-                        <span className="text-gray-500 text-xs font-semibold">Kapasitas Pakan</span>
-                        <span className="font-bold text-gray-800 text-xs">{alat.sisa} / {alat.kapasitas} Kg</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-                        <div 
-                            className={`h-3 rounded-full transition-all duration-1000 ${getBarColor(alat.sisa, alat.kapasitas)}`} 
-                            style={{ width: `${persentase}%` }}
-                        ></div>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            );
-          } 
-          
-          // Kalo kandang TIDAK AKTIF (Sekat 2,3,4)
-          else {
-            return (
-              <div key={alat.id} className="bg-white p-5 rounded-3xl border border-gray-100 opacity-60 grayscale">
-                 <div className="flex items-center gap-3">
-                    <div className="bg-gray-100 p-3 rounded-2xl text-gray-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-                        </svg>
+                
+                {/* Status Sistem Global */}
+                <div className="bg-white/50 backdrop-blur-md p-4 rounded-2xl shadow-sm border border-white/50 flex items-center gap-4">
+                    <div className="relative flex h-5 w-5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-5 w-5 bg-emerald-500"></span>
                     </div>
                     <div>
-                        <h3 className="font-bold text-gray-800 text-lg">{alat.nama}</h3>
-                        <p className="text-gray-400 text-xs font-medium italic">Alat belum terpasang</p>
+                        <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Status Server</h3>
+                        <p className="text-xl font-black text-gray-800 leading-none">ONLINE</p>
                     </div>
-                 </div>
-              </div>
-            );
-          }
-        })}
-      </div>
+                </div>
+            </header>
+
+            {/* --- RINGKASAN (Opsional, buat pemanis) --- */}
+            <div className="grid grid-cols-2 gap-4 mb-12">
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 p-6 rounded-3xl border border-blue-100/50 text-center">
+                    <h3 className="text-blue-800 font-bold text-sm uppercase tracking-widest mb-2">Total Populasi</h3>
+                    <p className="text-4xl font-black text-blue-900">125 <span className="text-xl">Ekor</span></p>
+                </div>
+                <div className="bg-gradient-to-br from-emerald-50 to-emerald-100/50 p-6 rounded-3xl border border-emerald-100/50 text-center">
+                    <h3 className="text-emerald-800 font-bold text-sm uppercase tracking-widest mb-2">Kandang Aktif</h3>
+                    <p className="text-4xl font-black text-emerald-900">1 <span className="text-xl">Unit</span></p>
+                </div>
+            </div>
+
+            {/* --- DAFTAR KANDANG --- */}
+            <h2 className="text-2xl font-black text-gray-800 mb-6 px-2 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-gray-600" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
+                </svg>
+                Monitoring Area
+            </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-8">
+                
+                {/* === KARTU KANDANG 1 (AKTIF) === */}
+                <Link href="/alat/Sekat%201">
+                    <div className="group relative overflow-hidden bg-white/70 backdrop-blur-lg p-8 rounded-[2rem] shadow-lg border border-white/60 cursor-pointer transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:bg-white/90 hover:border-emerald-300">
+                        {/* Efek Hover Gradient */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-emerald-100/0 via-emerald-100/30 to-teal-100/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+                        <div className="relative flex justify-between items-start mb-6">
+                            <div className="flex items-center gap-5">
+                                {/* Icon Rumah */}
+                                <div className="bg-gradient-to-br from-emerald-400 to-teal-500 p-4 rounded-2xl shadow-lg shadow-emerald-200">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" viewBox="0 0 20 20" fill="currentColor">
+                                      <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 className="text-2xl font-black text-gray-800 group-hover:text-emerald-700 transition-colors">Kandang Sekat 1</h3>
+                                    <p className="text-sm text-gray-500 font-mono font-bold mt-1">ID: Sekat 1</p>
+                                </div>
+                            </div>
+                            {/* Badge Status */}
+                            <span className="px-4 py-2 bg-emerald-100 text-emerald-800 text-xs font-black rounded-full uppercase tracking-wider shadow-sm group-hover:bg-emerald-200 transition-colors">
+                                Terpasang
+                            </span>
+                        </div>
+                        
+                        {/* Tombol Aksi Semu */}
+                        <div className="flex items-center justify-center gap-2 text-emerald-600 font-bold bg-emerald-50/50 p-3 rounded-xl group-hover:bg-emerald-100 transition-colors">
+                            <span>Buka Monitoring</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 group-hover:translate-x-1 transition-transform" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                            </svg>
+                        </div>
+                    </div>
+                </Link>
+
+                 {/* === KARTU KANDANG LAIN (CONTOH OFFLINE) === */}
+                 {/* Saya buat agak transparan dan abu-abu biar kelihatan belum aktif */}
+                 <div className="opacity-50 pointer-events-none bg-white/40 backdrop-blur-md p-8 rounded-[2rem] shadow border border-white/20 grayscale">
+                        <div className="flex justify-between items-start mb-6">
+                            <div className="flex items-center gap-5">
+                                <div className="bg-gray-200 p-4 rounded-2xl">
+                                   <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 className="text-2xl font-bold text-gray-700">Kandang Sekat 2</h3>
+                                    <p className="text-sm text-gray-500 font-mono font-bold mt-1">ID: -</p>
+                                </div>
+                            </div>
+                            <span className="px-4 py-2 bg-gray-200/50 text-gray-500 text-xs font-black rounded-full uppercase tracking-wider">
+                                Belum Aktif
+                            </span>
+                        </div>
+                        <div className="text-center text-gray-400 font-medium p-3 bg-gray-100/50 rounded-xl">
+                            Alat belum terpasang
+                        </div>
+                    </div>
+                
+                {/* Bisa tambah Kandang 3, 4 dst di sini... */}
+
+            </div>
+         </div>
+      </main>
     </div>
   );
 }
