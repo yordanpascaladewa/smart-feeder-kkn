@@ -2,80 +2,148 @@ import { useRouter } from 'next/router';
 import useSWR from 'swr';
 import Head from 'next/head';
 
-// Fetcher biar SWR bisa jalan
+// Fetcher untuk SWR
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
 export default function DetailAlat() {
   const router = useRouter();
   const { id } = router.query;
 
-  // TEKNIK REALTIME: Minta data ke /api/cekalat tiap 2 detik
+  // Realtime update tiap 2 detik
   const { data: result, error } = useSWR(id ? `/api/cekalat?id=${id}` : null, fetcher, {
     refreshInterval: 2000, 
   });
 
   // Tampilan Loading
-  if (!result && !error) return <div className="p-10 text-center font-bold text-gray-500">Menghubungkan ke Alat...</div>;
+  if (!result && !error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 text-gray-400 font-mono animate-pulse">
+        CONNECTING TO SATELLITE...
+      </div>
+    );
+  }
   
   const data = result?.data; 
-  if (!data) return <div className="p-10 text-center text-red-500 font-bold">Alat ID "{id}" Tidak Ditemukan di Database</div>;
+  if (!data) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 text-red-500 font-bold">
+        ALAT TIDAK DITEMUKAN
+      </div>
+    );
+  }
 
-  // --- LOGIKA WARNING ---
-  const isBahaya = data.berat_storage < 7.0; // Batas aman 7 Kg
+  // --- LOGIKA STATUS ---
+  const batasAman = 7.0; 
+  const kapasitasMax = 50.0; // Anggap gudang penuh di 50kg (Buat visual bar)
+  
+  const isBahaya = data.berat_storage < batasAman;
+  const persentase = Math.min((data.berat_storage / kapasitasMax) * 100, 100); // Max 100%
 
   return (
-    <div className={`min-h-screen transition-colors duration-500 ${isBahaya ? 'bg-red-50' : 'bg-green-50'}`}>
+    <div className={`min-h-screen transition-all duration-700 ease-in-out flex flex-col items-center justify-center p-4 md:p-8
+      ${isBahaya ? 'bg-gradient-to-br from-red-50 via-red-100 to-rose-200' : 'bg-gradient-to-br from-emerald-50 via-teal-100 to-cyan-200'}`}>
+      
       <Head>
-        <title>Monitor Gudang Pakan</title>
+        <title>Smart Storage Monitor</title>
       </Head>
 
-      <main className="max-w-md mx-auto p-6 flex flex-col items-center justify-center min-h-screen space-y-8">
+      {/* CONTAINER UTAMA (Lebar Maksimal di Laptop 4XL) */}
+      <main className="w-full max-w-4xl bg-white/60 backdrop-blur-xl rounded-[2.5rem] shadow-2xl border border-white/50 p-6 md:p-12 overflow-hidden relative">
         
+        {/* Hiasan Background Blobs */}
+        <div className={`absolute -top-20 -right-20 w-64 h-64 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob
+          ${isBahaya ? 'bg-red-300' : 'bg-green-300'}`}></div>
+        <div className={`absolute -bottom-20 -left-20 w-64 h-64 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000
+          ${isBahaya ? 'bg-orange-300' : 'bg-cyan-300'}`}></div>
+
         {/* HEADER */}
-        <div className="text-center space-y-1">
-          <h1 className="text-3xl font-black text-gray-800 tracking-tighter">GUDANG PAKAN</h1>
-          <p className="text-sm font-mono text-gray-500 bg-white px-2 py-1 rounded inline-block border">
-            ID: {data.id_alat}
-          </p>
-        </div>
-
-        {/* --- KARTU UTAMA (Indikator Berat) --- */}
-        <div className={`relative w-full p-10 rounded-3xl shadow-2xl border-4 text-center transition-all duration-300 transform 
-          ${isBahaya ? 'bg-white border-red-500 scale-105' : 'bg-white border-green-500'}`}>
+        <div className="relative z-10 flex flex-col md:flex-row justify-between items-center mb-10 border-b border-gray-200/50 pb-6">
+          <div className="text-center md:text-left">
+            <h1 className="text-3xl md:text-5xl font-black text-gray-800 tracking-tight">
+              MONITOR GUDANG
+            </h1>
+            <p className="text-sm font-mono text-gray-500 mt-1">ID: {data.id_alat}</p>
+          </div>
           
-          <p className="text-gray-400 font-bold tracking-widest text-xs mb-4 uppercase">
-            SISA STOK SAAT INI
-          </p>
-
-          {/* Angka Raksasa */}
-          <div className="flex justify-center items-baseline gap-2 mb-4">
-            <span className={`text-8xl font-black tracking-tighter ${isBahaya ? 'text-red-600' : 'text-gray-800'}`}>
-              {data.berat_storage}
+          {/* Badge Live Status */}
+          <div className="mt-4 md:mt-0 flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm border border-gray-100">
+            <span className="relative flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
             </span>
-            <span className="text-2xl text-gray-400 font-bold">Kg</span>
-          </div>
-
-          {/* Status Bar Bawah */}
-          <div className={`py-3 px-6 rounded-xl font-bold text-sm inline-flex items-center gap-2 shadow-sm
-            ${isBahaya ? 'bg-red-100 text-red-700 animate-pulse' : 'bg-green-100 text-green-700'}`}>
-            {isBahaya ? (
-              <>⚠️ KRITIS (KURANG DARI 7 KG)</>
-            ) : (
-              <>✅ STOK AMAN</>
-            )}
+            <span className="text-xs font-bold text-gray-600 tracking-wider">SYSTEM ONLINE</span>
           </div>
         </div>
 
-        {/* --- PETUNJUK (Hanya muncul kalau bahaya) --- */}
-        <div className={`transition-all duration-500 overflow-hidden ${isBahaya ? 'opacity-100 max-h-40' : 'opacity-0 max-h-0'}`}>
-            <div className="bg-red-600 text-white p-5 rounded-xl shadow-lg text-center animate-bounce">
-                <p className="font-bold text-lg mb-1">PERHATIAN!</p>
-                <p className="text-sm opacity-90">Stok menipis. Segera isi ulang pakan ke dalam gudang.</p>
+        {/* KONTEN UTAMA */}
+        <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+          
+          {/* KOLOM KIRI: ANGKA BESAR */}
+          <div className="text-center md:text-left space-y-2">
+            <p className="text-gray-400 font-bold text-sm tracking-[0.2em] uppercase">
+              Berat Aktual
+            </p>
+            <div className="flex items-baseline justify-center md:justify-start gap-2">
+              <span className={`text-8xl md:text-9xl font-black tracking-tighter transition-colors duration-300
+                ${isBahaya ? 'text-red-600 drop-shadow-sm' : 'text-gray-800 drop-shadow-sm'}`}>
+                {data.berat_storage}
+              </span>
+              <span className="text-2xl md:text-4xl text-gray-400 font-bold">Kg</span>
             </div>
+            
+            {/* STATUS BADGE */}
+            <div className={`inline-flex items-center gap-3 px-5 py-3 rounded-xl font-bold text-sm md:text-lg transition-all duration-300 mt-4
+              ${isBahaya ? 'bg-red-500 text-white shadow-lg shadow-red-500/30' : 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30'}`}>
+              {isBahaya ? (
+                <>
+                  <svg className="w-6 h-6 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  <span>STOK KRITIS! ISI SEGERA</span>
+                </>
+              ) : (
+                <>
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span>STOK AMAN TERKENDALI</span>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* KOLOM KANAN: VISUAL BAR (TANK) */}
+          <div className="w-full bg-gray-200/50 rounded-3xl p-2 h-64 md:h-80 relative flex flex-col justify-end overflow-hidden border border-white">
+            {/* Bar Fill */}
+            <div 
+              className={`w-full rounded-2xl transition-all duration-1000 ease-out relative flex items-center justify-center
+                ${isBahaya ? 'bg-gradient-to-t from-red-500 to-rose-400' : 'bg-gradient-to-t from-emerald-500 to-teal-400'}`}
+              style={{ height: `${persentase}%`, minHeight: '10%' }}
+            >
+              {/* Efek Gelombang simple */}
+              <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
+              <span className="relative text-white font-bold text-xl drop-shadow-md">
+                {Math.round(persentase)}%
+              </span>
+            </div>
+            
+            {/* Grid Lines (Garis Takaran) */}
+            <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-4 opacity-30">
+               <div className="border-t border-gray-600 w-full text-right text-xs">Full</div>
+               <div className="border-t border-gray-600 w-full text-right text-xs">75%</div>
+               <div className="border-t border-gray-600 w-full text-right text-xs">50%</div>
+               <div className="border-t border-gray-600 w-full text-right text-xs">25%</div>
+               <div className="border-t border-gray-600 w-full text-right text-xs">Empty</div>
+            </div>
+          </div>
+          
         </div>
 
-        <div className="text-xs text-gray-400 mt-10">
-          Last Sync: {new Date().toLocaleTimeString()}
+        {/* FOOTER */}
+        <div className="mt-12 text-center border-t border-gray-200/50 pt-6">
+          <p className="text-xs text-gray-400 font-mono">
+            Last Sync: {new Date().toLocaleTimeString()} • Server: Vercel Network
+          </p>
         </div>
 
       </main>
