@@ -125,7 +125,7 @@ export default function Home() {
       {/* --- FOOTER KREDIT ALA ALA (BARU) --- */}
       <footer className="absolute bottom-4 w-full text-center z-20 pointer-events-none">
         <p className="text-[10px] md:text-xs text-emerald-800/60 font-mono font-bold drop-shadow-sm">
-          Developed with ❤️ by <span className="text-emerald-900 underline decoration-emerald-500/30">Tim 71 KKN Desa Ponowareng</span>
+          Developed with ❤️ by <span className="text-emerald-900 underline decoration-emerald-500/30">Tim 1 Kelompok 71 KKN Desa Ponowareng</span>
         </p>
         <p className="text-[9px] md:text-[10px] text-emerald-700/50 uppercase tracking-[0.2em] mt-1 font-bold">
           Universitas Diponegoro • 2026

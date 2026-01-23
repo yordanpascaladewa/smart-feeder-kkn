@@ -41,8 +41,8 @@ export default function Login() {
       <div className="relative z-10 bg-white/10 backdrop-blur-md border border-white/20 p-8 rounded-[2rem] shadow-2xl w-full max-w-md">
         
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-black text-white tracking-tight">Selamat Datang!</h1>
-          <p className="text-emerald-100 text-sm mt-1 font-medium">Sistem Monitoring Pakan Terintegrasi</p>
+          <h1 className="text-3xl font-black text-white tracking-tight">Selamat Datang</h1>
+          <p className="text-emerald-100 text-sm mt-1 font-medium">Sistem Monitoring Pakan Bebek Terintegrasi</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-6">
@@ -90,7 +90,7 @@ export default function Login() {
       {/* FOOTER KREDIT */}
       <footer className="absolute bottom-6 w-full text-center z-20 pointer-events-none">
         <p className="text-[10px] md:text-xs text-emerald-100/70 font-mono font-bold drop-shadow-md">
-          Developed with ❤️ by <span className="text-white underline decoration-emerald-300/50">Tim 71 KKN Desa Ponowareng</span>
+          Developed with ❤️ by <span className="text-white underline decoration-emerald-300/50">Tim 1 Kelompok 71 KKN Desa Ponowareng</span>
         </p>
         <p className="text-[9px] md:text-[10px] text-emerald-200/50 uppercase tracking-[0.2em] mt-1 font-bold">
           Universitas Diponegoro • 2026
