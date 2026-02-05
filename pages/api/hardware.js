@@ -1,41 +1,37 @@
 import dbConnect from '../../lib/db';
-import Alat from '../../models/alat'; 
+import Alat from '../../models/alat'; // ⚠️ WAJIB HURUF KECIL (sesuai nama file alat.js)
 
 export default async function handler(req, res) {
   await dbConnect();
 
   const { method } = req;
-  // Ambil ID dari body (POST/PUT) atau dari query URL (GET)
   const id = req.body.id || req.query.id;
 
   if (!id) return res.status(400).json({ error: "ID Alat tidak ditemukan!" });
 
   try {
-    // --- 1. ESP32 LAPOR STATUS (POST) ---
+    // --- 1. POST: ESP32 LAPOR ---
     if (method === 'POST') {
       const { berat, status } = req.body;
-
-      // Cari berdasarkan nama "Sekat 1", kalau gak ada, buat baru (upsert)
+      
       const updated = await Alat.findOneAndUpdate(
-        { nama: id }, 
+        { nama: id },
         { 
           nama: id,
           sisa_pakan: berat,
           status_alat: status,
           last_update: new Date()
         },
-        { new: true, upsert: true } 
+        { new: true, upsert: true }
       );
 
-      // Balas ke ESP32: Ada perintah gak?
       return res.status(200).json({ 
         perintah: updated.perintah_pakan || "STOP", 
         target: updated.target_pakan || 0
       });
     } 
     
-    // --- 2. WEBSITE NGASIH PERINTAH (PUT) ---
-    // (Ini yang HILANG di kodingan kamu tadi!)
+    // --- 2. PUT: TOMBOL WEBSITE ---
     else if (method === 'PUT') {
       const { perintah, target } = req.body;
 
@@ -48,25 +44,19 @@ export default async function handler(req, res) {
         { upsert: true }
       );
 
-      return res.status(200).json({ message: "Siap, perintah disimpan!" });
+      return res.status(200).json({ message: "Sukses" });
     }
 
-    // --- 3. WEBSITE MINTA DATA (GET) ---
-    // (Ini juga HILANG)
+    // --- 3. GET: DATA DASHBOARD ---
     else if (method === 'GET') {
        const data = await Alat.findOne({ nama: id });
-       
-       if (!data) {
-         return res.status(200).json({ 
-           sisa_pakan: 0, 
-           status_alat: "Menunggu Alat..." 
-         });
-       }
+       if (!data) return res.status(200).json({ sisa_pakan: 0, status_alat: "Menunggu..." });
        return res.status(200).json(data);
     }
 
   } catch (error) {
-    console.error("Database Error:", error);
-    return res.status(500).json({ error: "Gagal memproses data", details: error.message });
+    console.error("Server Error:", error);
+    // Kirim pesan error asli biar ketahuan salahnya dimana
+    return res.status(500).json({ error: error.message });
   }
 }
