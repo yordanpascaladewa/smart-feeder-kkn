@@ -124,4 +124,10 @@ const styles = {
   row: { display: 'flex', gap: '20px', width: '100%', maxWidth: '600px', flexWrap: 'wrap' },
   cardSmall: { flex: 1, minWidth: '250px', backgroundColor: 'white', borderRadius: '24px', padding: '25px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' },
   headerSmall: { fontSize: '16px', fontWeight: 'bold', color: '#2c3e50', marginBottom: '20px' },
-  input: { width: '100%', padding: '15px', borderRadius: '12px', border: '2px solid #F0F2F5', marginBottom: '15px', fontSize
+  input: { width: '100%', padding: '15px', borderRadius: '12px', border: '2px solid #F0F2F5', marginBottom: '15px', fontSize: '20px', textAlign: 'center', fontWeight: 'bold' },
+  button: { width: '100%', padding: '15px', border: 'none', borderRadius: '12px', color: 'white', fontWeight: 'bold', cursor: 'pointer' },
+  scheduleItem: { display: 'flex', justifyContent: 'space-between', padding: '10px', backgroundColor: '#FAFAFA', borderRadius: '10px', marginBottom: '8px', fontSize:'14px', fontWeight:'bold', color:'#555' },
+  tagBlue: { backgroundColor: '#E3F2FD', color: '#2196F3', padding: '2px 6px', borderRadius: '4px', fontSize: '10px' },
+  tagPurple: { backgroundColor: '#F3E5F5', color: '#9C27B0', padding: '2px 6px', borderRadius: '4px', fontSize: '10px' },
+  target: { color: '#888', fontSize:'12px' }
+};
