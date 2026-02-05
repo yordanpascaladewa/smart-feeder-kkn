@@ -183,4 +183,5 @@ const s = {
   suffix: { fontWeight: '600', color: '#6B7280' },
   presetContainer: { display: 'flex', gap: '10px', marginBottom: '20px' },
   presetBtn: { flex: 1, padding: '8px', backgroundColor: '#F3F4F6', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: '600', color: '#4B5563' },
-  actionBtn: { width: '100%', padding: '15px', color: 'white', border:
+  actionBtn: { width: '100%', padding: '15px', color: 'white', border: 'none', borderRadius: '10px', fontWeight: 'bold', fontSize: '1rem', transition: 'background 0.2s' }
+};
