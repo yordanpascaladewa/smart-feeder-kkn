@@ -9,5 +9,5 @@ const AlatSchema = new mongoose.Schema({
   last_update: { type: Date, default: Date.now }
 });
 
-// Pakai export default biar import-nya gampang
+// Export Default biar aman di Vercel
 export default mongoose.models.Alat || mongoose.model('Alat', AlatSchema);

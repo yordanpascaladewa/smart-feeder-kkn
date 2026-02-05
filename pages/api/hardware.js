@@ -1,5 +1,5 @@
 import dbConnect from '../../lib/db';
-import Alat from '../../models/alat'; // ⚠️ WAJIB HURUF KECIL (sesuai nama file alat.js)
+import Alat from '../../models/alat'; // Huruf kecil 'alat' sesuai nama file kamu
 
 export default async function handler(req, res) {
   await dbConnect();
@@ -15,7 +15,7 @@ export default async function handler(req, res) {
       const { berat, status } = req.body;
       
       const updated = await Alat.findOneAndUpdate(
-        { nama: id },
+        { nama: id }, // Cari berdasarkan nama "Sekat 1"
         { 
           nama: id,
           sisa_pakan: berat,
@@ -56,7 +56,6 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error("Server Error:", error);
-    // Kirim pesan error asli biar ketahuan salahnya dimana
     return res.status(500).json({ error: error.message });
   }
 }
