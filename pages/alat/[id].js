@@ -6,15 +6,14 @@ export default function AlatDetail() {
   const router = useRouter();
   const { id } = router.query; 
 
-  // STATE DATA
   const [beratGudang, setBeratGudang] = useState(0);
   const [statusAlat, setStatusAlat] = useState("Offline");
-  const [targetPakan, setTargetPakan] = useState("");
+  const [durasi, setDurasi] = useState(""); // Input Durasi
   const [loading, setLoading] = useState(false);
   
-  const MAX_CAPACITY = 10.0; 
+  const KAPASITAS_MAX = 10.0; // Kg
 
-  // 1. POLLING DATA (Nembak API tiap 2 detik)
+  // 1. POLLING DATA
   useEffect(() => {
     if(!id) return;
     const interval = setInterval(() => {
@@ -26,14 +25,14 @@ export default function AlatDetail() {
             setStatusAlat(data.status_alat || "Offline");
           }
         })
-        .catch(err => console.log("Gagal konek DB"));
+        .catch(err => console.log("Koneksi Error"));
     }, 2000);
     return () => clearInterval(interval);
   }, [id]);
 
-  // 2. FUNGSI KIRIM PERINTAH
-  const handleKirimPerintah = async () => {
-    if (!targetPakan || targetPakan <= 0) return alert("Masukkan jumlah pakan!");
+  // 2. KIRIM PERINTAH
+  const handleBeriPakan = async () => {
+    if (!durasi || durasi <= 0) return alert("Masukkan durasi buka (detik)!");
     setLoading(true);
 
     try {
@@ -42,97 +41,146 @@ export default function AlatDetail() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           id: id,
-          perintah: "MAJU", // Kata kunci rahasia buat ESP32
-          target: parseFloat(targetPakan)
+          perintah: "MAJU", 
+          target: parseFloat(durasi) // Kirim durasi sebagai 'target'
         })
       });
 
       if(res.ok) {
-        alert("✅ Perintah Terkirim! Alat akan segera bergerak.");
-        setTargetPakan(""); 
-      } else {
-        alert("❌ Gagal kirim perintah.");
+        alert(`✅ Perintah dikirim! Membuka selama ${durasi} detik.`);
+        setDurasi(""); 
       }
     } catch (error) {
-      alert("Error koneksi server.");
+      alert("Gagal konek server.");
     }
     setLoading(false);
   };
 
-  const isKritis = beratGudang < 7.0; 
-  const persentase = Math.min((beratGudang / MAX_CAPACITY) * 100, 100);
+  const persenIsi = Math.min((beratGudang / KAPASITAS_MAX) * 100, 100);
+  const isHabis = beratGudang < 0.5; // Warning kalau < 0.5 Kg
+  const statusColor = statusAlat === "STANDBY" ? "#10B981" : (statusAlat === "Offline" ? "#9CA3AF" : "#F59E0B");
 
   return (
-    <div style={styles.container}>
-      <Head><title>Smart Control Panel</title></Head>
+    <div style={s.page}>
+      <Head><title>Monitoring Peternakan</title></Head>
+      
+      {/* NAVBAR */}
+      <nav style={s.nav}>
+        <div style={s.navContent}>
+          <h1 style={s.logo}>🦆 SmartFeed Pro</h1>
+          <span style={s.badgeID}>UNIT: {id}</span>
+        </div>
+      </nav>
 
-      <div style={styles.cardMain}>
-        <div style={styles.leftSide}>
-          <h3 style={styles.cardTitle}>GUDANG PAKAN</h3>
-          <p style={styles.subTitle}>ID: {id}</p>
-          <h1 style={{...styles.bigNumber, color: isKritis ? '#FF3B30' : '#333'}}>
-            {beratGudang.toFixed(1)} <span style={styles.unit}>Kg</span>
-          </h1>
-          <div style={{...styles.badge, backgroundColor: isKritis ? '#FF3B30' : '#4CD964'}}>
-            {isKritis ? '⚠️ KRITIS (< 7 Kg)' : '✅ AMAN'}
-          </div>
-          <p style={{marginTop: 10, fontSize: 12, color: '#888'}}>Status Alat: <b>{statusAlat}</b></p>
-        </div>
-        <div style={styles.rightSide}>
-          <div style={styles.tankContainer}>
-            <div style={{...styles.tankFill, height: `${persentase}%`}}></div>
-            <span style={styles.tankText}>{persentase.toFixed(0)}%</span>
-          </div>
-        </div>
-      </div>
-
-      <div style={styles.row}>
-        <div style={styles.cardSmall}>
-          <div style={styles.headerSmall}>⚡ Isi Manual (Kg)</div>
-          <div style={styles.inputContainer}>
-            <input type="number" placeholder="0.0" style={styles.input} value={targetPakan} onChange={(e) => setTargetPakan(e.target.value)} />
-          </div>
-          <button onClick={handleKirimPerintah} disabled={loading} style={{...styles.button, opacity: loading ? 0.7 : 1}}>
-            {loading ? 'MENGIRIM...' : 'KIRIM PERINTAH'}
-          </button>
-        </div>
+      <main style={s.main}>
         
-        <div style={styles.cardSmall}>
-          <div style={styles.headerSmall}>🕒 Jadwal Pakan</div>
-          <div style={styles.scheduleItem}>
-            <span style={styles.tagBlue}>PAGI</span> <span style={styles.time}>07:00</span> <span style={styles.target}>0.5 Kg</span>
-          </div>
-          <div style={styles.scheduleItem}>
-            <span style={styles.tagPurple}>SORE</span> <span style={styles.time}>16:00</span> <span style={styles.target}>0.5 Kg</span>
-          </div>
+        {/* STATUS CARD */}
+        <div style={s.statusBanner}>
+          <div style={{...s.statusDot, backgroundColor: statusColor}}></div>
+          <p>Status Sistem: <b>{statusAlat}</b></p>
         </div>
-      </div>
+
+        <div style={s.grid}>
+          
+          {/* KARTU 1: MONITORING GUDANG */}
+          <div style={s.card}>
+            <div style={s.cardHeader}>
+              <h3>📦 Stok Gudang</h3>
+              <span style={{fontSize:'12px', color:'#6B7280'}}>Realtime</span>
+            </div>
+            
+            <div style={s.gaugeContainer}>
+              <div style={s.circleOuter}>
+                <div style={s.circleInner}>
+                  <h1 style={{fontSize:'3rem', margin:0, color:'#1F2937'}}>{beratGudang.toFixed(1)}</h1>
+                  <span style={{color:'#6B7280'}}>Kilogram</span>
+                </div>
+                {/* Lingkaran Progress CSS Sederhana */}
+                <svg style={s.svg} viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="45" fill="none" stroke="#E5E7EB" strokeWidth="8" />
+                  <circle cx="50" cy="50" r="45" fill="none" stroke={isHabis ? "#EF4444" : "#3B82F6"} strokeWidth="8" 
+                          strokeDasharray="283" strokeDashoffset={283 - (283 * persenIsi / 100)} 
+                          style={{transition: 'all 1s ease', transform: 'rotate(-90deg)', transformOrigin: '50% 50%'}} />
+                </svg>
+              </div>
+            </div>
+
+            {isHabis && (
+              <div style={s.alertBox}>
+                ⚠️ <b>PERINGATAN:</b> Stok Hampir Habis! <br/> Alat tidak akan mau terbuka.
+              </div>
+            )}
+          </div>
+
+          {/* KARTU 2: KONTROL PAKAN */}
+          <div style={s.card}>
+            <div style={s.cardHeader}>
+              <h3>⚡ Kontrol Manual</h3>
+              <span style={{fontSize:'12px', color:'#6B7280'}}>Buka Timer</span>
+            </div>
+
+            <div style={s.controlBody}>
+              <p style={{color:'#4B5563', marginBottom:'10px'}}>Berapa lama katup dibuka?</p>
+              
+              <div style={s.inputGroup}>
+                <input 
+                  type="number" 
+                  placeholder="3" 
+                  value={durasi}
+                  onChange={(e) => setDurasi(e.target.value)}
+                  style={s.input}
+                />
+                <span style={s.suffix}>Detik</span>
+              </div>
+
+              <div style={s.presetContainer}>
+                {[2, 5, 8].map((sec) => (
+                  <button key={sec} onClick={() => setDurasi(sec)} style={s.presetBtn}>{sec}s</button>
+                ))}
+              </div>
+
+              <button 
+                onClick={handleBeriPakan}
+                disabled={loading || isHabis}
+                style={{
+                  ...s.actionBtn,
+                  backgroundColor: isHabis ? '#D1D5DB' : '#3B82F6',
+                  cursor: isHabis ? 'not-allowed' : 'pointer'
+                }}
+              >
+                {loading ? 'Mengirim...' : (isHabis ? 'STOK HABIS (TERKUNCI)' : 'BERI PAKAN SEKARANG')}
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </main>
     </div>
   );
 }
 
-const styles = {
-  container: { minHeight: '100vh', backgroundColor: '#FFE8E8', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px', fontFamily: "Arial, sans-serif" },
-  cardMain: { backgroundColor: 'white', width: '100%', maxWidth: '600px', borderRadius: '20px', padding: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 10px 30px rgba(0,0,0,0.05)', marginBottom: '20px' },
-  leftSide: { flex: 1 },
-  cardTitle: { margin: 0, fontSize: '18px', fontWeight: '800', color: '#2c3e50' },
-  subTitle: { margin: 0, fontSize: '12px', color: '#95a5a6', marginBottom: '10px' },
-  bigNumber: { fontSize: '60px', fontWeight: 'bold', margin: '10px 0', lineHeight: 1 },
-  unit: { fontSize: '24px', color: '#7f8c8d' },
-  badge: { display: 'inline-block', padding: '5px 15px', borderRadius: '50px', color: 'white', fontSize: '12px', fontWeight: 'bold' },
-  rightSide: { width: '80px', height: '140px', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' },
-  tankContainer: { width: '60px', height: '100%', backgroundColor: '#F0F2F5', borderRadius: '15px', overflow: 'hidden', position: 'relative', border: '4px solid white', boxShadow: 'inset 0 2px 5px rgba(0,0,0,0.1)' },
-  tankFill: { width: '100%', backgroundColor: '#FF5E57', position: 'absolute', bottom: 0, transition: 'height 0.5s ease' },
-  tankText: { position: 'absolute', bottom: '10px', width: '100%', textAlign: 'center', fontSize: '12px', fontWeight: 'bold', color: '#333', zIndex: 2 },
-  row: { display: 'flex', gap: '20px', width: '100%', maxWidth: '600px', flexWrap: 'wrap' },
-  cardSmall: { flex: 1, minWidth: '250px', backgroundColor: 'white', borderRadius: '20px', padding: '25px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' },
-  headerSmall: { fontSize: '16px', fontWeight: 'bold', color: '#333', marginBottom: '20px' },
-  inputContainer: { marginBottom: '15px' },
-  input: { width: '100%', padding: '15px', borderRadius: '12px', border: 'none', backgroundColor: '#F7F9FC', fontSize: '24px', textAlign: 'center', fontWeight: 'bold', color: '#333', outline: 'none' },
-  button: { width: '100%', padding: '15px', background: 'linear-gradient(90deg, #FF9966 0%, #FF5E62 100%)', border: 'none', borderRadius: '12px', color: 'white', fontWeight: 'bold', cursor: 'pointer' },
-  scheduleItem: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#FAFAFA', padding: '12px', borderRadius: '12px', marginBottom: '10px' },
-  tagBlue: { backgroundColor: '#E3F2FD', color: '#2196F3', padding: '4px 8px', borderRadius: '6px', fontSize: '10px', fontWeight: 'bold' },
-  tagPurple: { backgroundColor: '#F3E5F5', color: '#9C27B0', padding: '4px 8px', borderRadius: '6px', fontSize: '10px', fontWeight: 'bold' },
-  time: { fontWeight: 'bold', fontSize: '16px', color: '#333' },
-  target: { fontSize: '12px', color: '#888' }
-};
+// STYLE MODERN (CSS-in-JS)
+const s = {
+  page: { minHeight: '100vh', backgroundColor: '#F3F4F6', fontFamily: "'Inter', sans-serif" },
+  nav: { backgroundColor: '#FFFFFF', borderBottom: '1px solid #E5E7EB', padding: '15px 0' },
+  navContent: { maxWidth: '1000px', margin: '0 auto', padding: '0 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
+  logo: { fontSize: '1.25rem', fontWeight: 'bold', color: '#111827', margin: 0 },
+  badgeID: { backgroundColor: '#EFF6FF', color: '#2563EB', padding: '5px 10px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: '600' },
+  main: { maxWidth: '1000px', margin: '30px auto', padding: '0 20px' },
+  statusBanner: { display: 'flex', alignItems: 'center', gap: '10px', backgroundColor: 'white', padding: '15px 20px', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', marginBottom: '20px' },
+  statusDot: { width: '10px', height: '10px', borderRadius: '50%' },
+  grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' },
+  card: { backgroundColor: 'white', borderRadius: '16px', padding: '25px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' },
+  cardHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' },
+  gaugeContainer: { display: 'flex', justifyContent: 'center', margin: '20px 0' },
+  circleOuter: { width: '200px', height: '200px', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' },
+  circleInner: { textAlign: 'center', position: 'absolute', zIndex: 10 },
+  svg: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' },
+  alertBox: { backgroundColor: '#FEF2F2', color: '#991B1B', padding: '10px', borderRadius: '8px', fontSize: '0.9rem', marginTop: '15px', border: '1px solid #FECACA' },
+  controlBody: { display: 'flex', flexDirection: 'column' },
+  inputGroup: { display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '15px' },
+  input: { flex: 1, padding: '12px', fontSize: '1.1rem', borderRadius: '8px', border: '1px solid #D1D5DB', textAlign: 'center' },
+  suffix: { fontWeight: '600', color: '#6B7280' },
+  presetContainer: { display: 'flex', gap: '10px', marginBottom: '20px' },
+  presetBtn: { flex: 1, padding: '8px', backgroundColor: '#F3F4F6', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: '600', color: '#4B5563' },
+  actionBtn: { width: '100%', padding: '15px', color: 'white', border:
