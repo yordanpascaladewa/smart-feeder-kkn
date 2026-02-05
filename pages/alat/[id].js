@@ -8,10 +8,10 @@ export default function AlatDetail() {
 
   const [beratGudang, setBeratGudang] = useState(0);
   const [statusAlat, setStatusAlat] = useState("Offline");
-  const [targetPakan, setTargetPakan] = useState(""); // Input Kg
+  const [targetPakan, setTargetPakan] = useState(""); 
   const [loading, setLoading] = useState(false);
   
-  const KAPASITAS_MAX = 10.0; // Kapasitas Visual (10 Kg)
+  const KAPASITAS_MAX = 10.0; 
 
   useEffect(() => {
     if(!id) return;
@@ -20,20 +20,18 @@ export default function AlatDetail() {
         .then((res) => res.json())
         .then((data) => {
           if(data) {
-            // Fix tampilan kalau minus (biar gak jelek)
             let b = parseFloat(data.sisa_pakan || 0);
-            if (b < 0) b = 0; 
+            if (b < 0) b = 0; // Fix minus
             setBeratGudang(b);
             setStatusAlat(data.status_alat || "Offline");
           }
-        })
-        .catch(err => console.log("Koneksi Error"));
+        });
     }, 2000);
     return () => clearInterval(interval);
   }, [id]);
 
   const handleKirim = async () => {
-    if (!targetPakan || targetPakan <= 0) return alert("Masukkan jumlah pakan (Kg)!");
+    if (!targetPakan || targetPakan <= 0) return alert("Masukkan jumlah Kg!");
     setLoading(true);
     
     try {
@@ -43,17 +41,15 @@ export default function AlatDetail() {
         body: JSON.stringify({
           id: id,
           perintah: "MAJU", 
-          target: parseFloat(targetPakan) // Kirim Target Kg
+          target: parseFloat(targetPakan) 
         })
       });
 
       if(res.ok) {
-        alert(`✅ Perintah Terkirim! Mengeluarkan ${targetPakan} Kg.`);
+        alert("✅ Perintah Terkirim!");
         setTargetPakan(""); 
       }
-    } catch (error) {
-      alert("Gagal konek server.");
-    }
+    } catch (error) { alert("Error koneksi"); }
     setLoading(false);
   };
 
@@ -64,7 +60,6 @@ export default function AlatDetail() {
     <div style={styles.container}>
       <Head><title>Smart Control Panel</title></Head>
 
-      {/* KARTU ATAS: MONITORING */}
       <div style={styles.cardMain}>
         <div style={styles.leftSide}>
           <h3 style={styles.cardTitle}>GUDANG PAKAN</h3>
@@ -77,8 +72,6 @@ export default function AlatDetail() {
           </div>
           <p style={{marginTop:15, fontSize:12, color:'#888'}}>Status: <b>{statusAlat}</b></p>
         </div>
-        
-        {/* Visualisasi Tangki */}
         <div style={styles.rightSide}>
           <div style={styles.tankContainer}>
             <div style={{...styles.tankFill, height: `${persen}%`, backgroundColor: isHabis ? '#FF3B30' : '#FF5E57'}}></div>
@@ -87,45 +80,29 @@ export default function AlatDetail() {
       </div>
 
       <div style={styles.row}>
-        {/* KARTU KIRI: ISI MANUAL */}
         <div style={styles.cardSmall}>
           <div style={styles.headerSmall}>⚡ Isi Manual (Kg)</div>
-          <div style={{marginBottom:'15px'}}>
-            <input 
-              type="number" 
-              placeholder="Contoh: 0.5" 
-              style={styles.input} 
-              value={targetPakan}
-              onChange={(e) => setTargetPakan(e.target.value)}
-              disabled={isHabis}
-            />
-          </div>
-          <div style={styles.presetContainer}>
-             {[0.1, 0.3, 0.5].map(val => (
-               <button key={val} onClick={()=>setTargetPakan(val)} style={styles.presetBtn}>{val}Kg</button>
-             ))}
-          </div>
+          <input 
+            type="number" 
+            placeholder="0.5" 
+            style={styles.input} 
+            value={targetPakan}
+            onChange={(e) => setTargetPakan(e.target.value)}
+            disabled={isHabis}
+          />
           <button 
             onClick={handleKirim} 
             disabled={loading || isHabis}
-            style={{
-              ...styles.button, 
-              background: isHabis ? '#95a5a6' : 'linear-gradient(90deg, #FF9966 0%, #FF5E62 100%)'
-            }}
+            style={{...styles.button, background: isHabis ? '#95a5a6' : 'linear-gradient(90deg, #FF9966 0%, #FF5E62 100%)'}}
           >
-            {loading ? 'MENGIRIM...' : (isHabis ? 'STOK HABIS' : 'BERI PAKAN SEKARANG')}
+            {loading ? 'MENGIRIM...' : (isHabis ? 'STOK HABIS' : 'BERI PAKAN')}
           </button>
         </div>
         
-        {/* KARTU KANAN: JADWAL */}
         <div style={styles.cardSmall}>
-          <div style={styles.headerSmall}>🕒 Jadwal Otomatis</div>
-          <div style={styles.scheduleItem}>
-            <span style={styles.tagBlue}>PAGI</span> 07:00 <span style={styles.target}>0.5 Kg</span>
-          </div>
-          <div style={styles.scheduleItem}>
-            <span style={styles.tagPurple}>SORE</span> 16:00 <span style={styles.target}>0.5 Kg</span>
-          </div>
+          <div style={styles.headerSmall}>🕒 Jadwal</div>
+          <div style={styles.scheduleItem}><span style={styles.tagBlue}>PAGI</span> 07:00 <span style={styles.target}>0.5 Kg</span></div>
+          <div style={styles.scheduleItem}><span style={styles.tagPurple}>SORE</span> 16:00 <span style={styles.target}>0.5 Kg</span></div>
         </div>
       </div>
     </div>
@@ -147,12 +124,4 @@ const styles = {
   row: { display: 'flex', gap: '20px', width: '100%', maxWidth: '600px', flexWrap: 'wrap' },
   cardSmall: { flex: 1, minWidth: '250px', backgroundColor: 'white', borderRadius: '24px', padding: '25px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' },
   headerSmall: { fontSize: '16px', fontWeight: 'bold', color: '#2c3e50', marginBottom: '20px' },
-  input: { width: '100%', padding: '15px', borderRadius: '12px', border: '2px solid #F0F2F5', fontSize: '20px', textAlign: 'center', fontWeight: 'bold' },
-  presetContainer: { display:'flex', gap:'10px', marginBottom:'20px' },
-  presetBtn: { flex:1, padding:'8px', borderRadius:'8px', border:'none', backgroundColor:'#F0F2F5', cursor:'pointer', fontWeight:'bold', color:'#555'},
-  button: { width: '100%', padding: '15px', border: 'none', borderRadius: '12px', color: 'white', fontWeight: 'bold', cursor: 'pointer' },
-  scheduleItem: { display: 'flex', justifyContent: 'space-between', padding: '10px', backgroundColor: '#FAFAFA', borderRadius: '10px', marginBottom: '8px', fontSize:'14px', fontWeight:'bold', color:'#555' },
-  tagBlue: { backgroundColor: '#E3F2FD', color: '#2196F3', padding: '2px 6px', borderRadius: '4px', fontSize: '10px' },
-  tagPurple: { backgroundColor: '#F3E5F5', color: '#9C27B0', padding: '2px 6px', borderRadius: '4px', fontSize: '10px' },
-  target: { color: '#888', fontSize:'12px' }
-};
+  input: { width: '100%', padding: '15px', borderRadius: '12px', border: '2px solid #F0F2F5', marginBottom: '15px', fontSize

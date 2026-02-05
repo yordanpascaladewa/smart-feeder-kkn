@@ -1,5 +1,5 @@
 import dbConnect from '../../lib/db';
-import Alat from '../../models/alat'; // Huruf kecil 'alat' sesuai nama file kamu
+import Alat from '../../models/alat'; 
 
 export default async function handler(req, res) {
   await dbConnect();
@@ -10,12 +10,13 @@ export default async function handler(req, res) {
   if (!id) return res.status(400).json({ error: "ID Alat tidak ditemukan!" });
 
   try {
-    // --- 1. POST: ESP32 LAPOR ---
+    // --- 1. POST: ESP32 LAPOR (Laporan Rutin) ---
     if (method === 'POST') {
       const { berat, status } = req.body;
       
-      const updated = await Alat.findOneAndUpdate(
-        { nama: id }, // Cari berdasarkan nama "Sekat 1"
+      // Update data terbaru dari ESP32
+      let alat = await Alat.findOneAndUpdate(
+        { nama: id },
         { 
           nama: id,
           sisa_pakan: berat,
@@ -25,13 +26,27 @@ export default async function handler(req, res) {
         { new: true, upsert: true }
       );
 
+      // CEK: APAKAH ADA PERINTAH DARI WEBSITE?
+      const perintahSekarang = alat.perintah_pakan || "STOP";
+      const targetSekarang = alat.target_pakan || 0;
+
+      // 🔥 FITUR ANTI-GHOSTING (PENTING!)
+      // Kalau perintahnya "MAJU", kita kirim ke ESP32...
+      // TAPI detik itu juga kita HAPUS perintahnya jadi "STOP" di database.
+      // Jadi pas ESP32 lapor lagi 2 detik kemudian, perintahnya udah hilang.
+      if (perintahSekarang === "MAJU") {
+        await Alat.updateOne({ nama: id }, { perintah_pakan: "STOP" });
+        console.log(`Perintah MAJU dikirim ke ${id}, database di-reset ke STOP.`);
+      }
+
+      // Kirim jawaban ke ESP32
       return res.status(200).json({ 
-        perintah: updated.perintah_pakan || "STOP", 
-        target: updated.target_pakan || 0
+        perintah: perintahSekarang, 
+        target: targetSekarang
       });
     } 
     
-    // --- 2. PUT: TOMBOL WEBSITE ---
+    // --- 2. PUT: TOMBOL WEBSITE (User Ngasih Perintah) ---
     else if (method === 'PUT') {
       const { perintah, target } = req.body;
 
@@ -44,7 +59,7 @@ export default async function handler(req, res) {
         { upsert: true }
       );
 
-      return res.status(200).json({ message: "Sukses" });
+      return res.status(200).json({ message: "Siap, perintah disimpan!" });
     }
 
     // --- 3. GET: DATA DASHBOARD ---
