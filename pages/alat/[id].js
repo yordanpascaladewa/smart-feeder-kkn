@@ -1,149 +1,299 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import useSWR from 'swr';
 import Head from 'next/head';
 
-const fetcher = (url) => fetch(url).then((res) => res.json());
-
-export default function DetailAlat() {
+export default function AlatDetail() {
   const router = useRouter();
-  const { id } = router.query;
-  const [manualBerat, setManualBerat] = useState('');
-  const [loadingManual, setLoadingManual] = useState(false);
+  const { id } = router.query; 
 
-  const { data: result, error } = useSWR(id ? `/api/cekalat?id=${id}` : null, fetcher, {
-    refreshInterval: 1000,
-  });
+  // STATE DATA
+  const [beratGudang, setBeratGudang] = useState(0);
+  const [statusAlat, setStatusAlat] = useState("Offline");
+  const [targetPakan, setTargetPakan] = useState("");
+  const [loading, setLoading] = useState(false);
+  
+  // Kapasitas Gudang (Misal Max 10 Kg buat visualisasi bar kanan)
+  const MAX_CAPACITY = 10.0; 
 
-  const handleManualFeed = async () => {
-    if (!manualBerat || manualBerat <= 0) return alert("Masukkan jumlah pakan!");
-    setLoadingManual(true);
+  // 1. POLLING DATA (Nembak API tiap 2 detik)
+  useEffect(() => {
+    if(!id) return;
+    const interval = setInterval(() => {
+      fetch(`/api/hardware?id=${id}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if(data) {
+            setBeratGudang(parseFloat(data.sisa_pakan || 0));
+            setStatusAlat(data.status_alat || "Offline");
+          }
+        })
+        .catch(err => console.log("Gagal konek DB"));
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [id]);
+
+  // 2. FUNGSI KIRIM PERINTAH
+  const handleKirimPerintah = async () => {
+    if (!targetPakan || targetPakan <= 0) return alert("Masukkan jumlah pakan!");
+    setLoading(true);
+
     try {
-      const res = await fetch('/api/trigger', {
-        method: 'POST',
+      const res = await fetch('/api/hardware', {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id_alat: id, berat: manualBerat }),
+        body: JSON.stringify({
+          id: id,
+          perintah: "MAJU", // Kata kunci rahasia buat ESP32
+          target: parseFloat(targetPakan)
+        })
       });
-      if (res.ok) { alert(`✅ Perintah Terkirim: ${manualBerat} Kg`); setManualBerat(''); }
-    } catch (err) { alert("Error koneksi."); }
-    setLoadingManual(false);
+
+      if(res.ok) {
+        alert("✅ Perintah Terkirim! Alat akan segera bergerak.");
+        setTargetPakan(""); // Reset input
+      } else {
+        alert("❌ Gagal kirim perintah.");
+      }
+    } catch (error) {
+      alert("Error koneksi server.");
+    }
+    setLoading(false);
   };
 
-  if (!result && !error) return <div className="min-h-screen flex items-center justify-center bg-gray-50 text-gray-400 animate-pulse text-sm">Menghubungkan...</div>;
-  const data = result?.data; 
-  if (!data) return <div className="min-h-screen flex items-center justify-center bg-gray-100 text-red-500 font-bold text-sm">ALAT TIDAK DITEMUKAN</div>;
-
-  // --- KEMBALI KE KILOGRAM (KG) ---
-  const batasAman = 7.0;    // 7 Kg
-  const kapasitasMax = 50.0; // 50 Kg
-  
-  const isBahaya = data.berat_storage < batasAman;
-  const persentase = Math.min((data.berat_storage / kapasitasMax) * 100, 100); 
+  // 3. LOGIKA WARNA STATUS
+  const isKritis = beratGudang < 7.0; // Contoh batas kritis
+  const persentase = Math.min((beratGudang / MAX_CAPACITY) * 100, 100);
 
   return (
-    <div className={`min-h-screen w-full transition-all duration-700 ease-in-out p-4 flex items-center justify-center
-      ${isBahaya ? 'bg-gradient-to-br from-red-50 via-red-100 to-rose-200' : 'bg-gradient-to-br from-emerald-50 via-teal-100 to-cyan-200'}`}>
-      
-      <Head><title>Smart Control Panel</title></Head>
+    <div style={styles.container}>
+      <Head>
+        <title>Smart Control Panel</title>
+      </Head>
 
-      <main className="w-full max-w-lg md:max-w-4xl space-y-5">
+      {/* --- KARTU ATAS (GUDANG PAKAN) --- */}
+      <div style={styles.cardMain}>
+        <div style={styles.leftSide}>
+          <h3 style={styles.cardTitle}>GUDANG PAKAN</h3>
+          <p style={styles.subTitle}>ID: {id}</p>
+          
+          <h1 style={{...styles.bigNumber, color: isKritis ? '#FF3B30' : '#333'}}>
+            {beratGudang.toFixed(1)} <span style={styles.unit}>Kg</span>
+          </h1>
+
+          {/* Badge Status */}
+          <div style={{
+            ...styles.badge, 
+            backgroundColor: isKritis ? '#FF3B30' : '#4CD964'
+          }}>
+            {isKritis ? '⚠️ KRITIS (< 7 Kg)' : '✅ AMAN'}
+          </div>
+          
+          <p style={{marginTop: 10, fontSize: 12, color: '#888'}}>Status Alat: <b>{statusAlat}</b></p>
+        </div>
+
+        {/* Visualisasi Bar Air/Pakan (Kanan) */}
+        <div style={styles.rightSide}>
+          <div style={styles.tankContainer}>
+            <div style={{...styles.tankFill, height: `${persentase}%`}}></div>
+            <span style={styles.tankText}>{persentase.toFixed(0)}%</span>
+          </div>
+        </div>
+      </div>
+
+      <div style={styles.row}>
         
-        {/* === MONITORING STORAGE (KG) === */}
-        <div className="relative w-full bg-white/60 backdrop-blur-xl rounded-[2rem] shadow-2xl border border-white/50 p-6 md:p-8 overflow-hidden">
-            <div className={`absolute -top-20 -right-20 w-40 h-40 md:w-64 md:h-64 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob ${isBahaya ? 'bg-red-300' : 'bg-green-300'}`}></div>
+        {/* --- KARTU KIRI (ISI MANUAL) --- */}
+        <div style={styles.cardSmall}>
+          <div style={styles.headerSmall}>
+            <span style={styles.icon}>⚡</span> Isi Manual (Kg)
+          </div>
+          
+          <div style={styles.inputContainer}>
+            <input 
+              type="number" 
+              placeholder="0.0" 
+              style={styles.input}
+              value={targetPakan}
+              onChange={(e) => setTargetPakan(e.target.value)}
+            />
+          </div>
 
-            <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
-                <div className="text-center md:text-left flex-1">
-                    <h1 className="text-xl md:text-3xl font-black text-gray-800 tracking-tight">GUDANG PAKAN</h1>
-                    <p className="text-xs font-mono text-gray-500 mb-4 bg-white/50 px-2 py-1 rounded inline-block">ID: {data.id_alat}</p>
-                    
-                    <div className="flex items-baseline justify-center md:justify-start gap-2 mb-2">
-                        <span className={`text-6xl md:text-8xl font-black tracking-tighter ${isBahaya ? 'text-red-600' : 'text-gray-800'}`}>
-                            {data.berat_storage}
-                        </span>
-                        <span className="text-xl md:text-2xl text-gray-400 font-bold">Kg</span>
-                    </div>
-
-                    <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg font-bold text-xs shadow-sm transition-all
-                        ${isBahaya ? 'bg-red-500 text-white' : 'bg-emerald-500 text-white'}`}>
-                        {isBahaya ? '⚠️ KRITIS (< 7 Kg)' : '✅ AMAN'}
-                    </div>
-                </div>
-
-                {/* Visual Tank */}
-                <div className="w-full md:w-32 h-32 md:h-48 bg-gray-200/50 rounded-2xl p-2 relative flex flex-col justify-end overflow-hidden border border-white">
-                    <div className={`w-full rounded-xl transition-all duration-1000 relative flex items-center justify-center
-                        ${isBahaya ? 'bg-gradient-to-t from-red-500 to-rose-400' : 'bg-gradient-to-t from-emerald-500 to-teal-400'}`}
-                        style={{ height: `${persentase}%`, minHeight: '15%' }}>
-                        <span className="text-white font-bold text-sm drop-shadow-md">{Math.round(persentase)}%</span>
-                    </div>
-                </div>
-            </div>
+          <button 
+            onClick={handleKirimPerintah}
+            disabled={loading}
+            style={{
+              ...styles.button,
+              opacity: loading ? 0.7 : 1,
+              cursor: loading ? 'not-allowed' : 'pointer'
+            }}
+          >
+            {loading ? 'MENGIRIM...' : 'KIRIM PERINTAH'}
+          </button>
         </div>
 
-        {/* === GRID BAWAH: MANUAL & JADWAL === */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            
-            {/* KARTU 1: FEEDING MANUAL */}
-            <div className="bg-white/70 backdrop-blur-lg rounded-[2rem] p-6 shadow-xl border border-white/40">
-                <div className="flex items-center gap-2 mb-4">
-                    <div className="p-2 bg-orange-100 rounded-lg text-orange-600">⚡</div>
-                    <h2 className="text-base font-black text-gray-800">Isi Manual (Kg)</h2>
-                </div>
-                <div className="flex flex-col gap-3">
-                    <input 
-                        type="number" 
-                        placeholder="0.0" 
-                        value={manualBerat}
-                        onChange={(e) => setManualBerat(e.target.value)}
-                        className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-2xl font-bold text-center text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-300 transition-all placeholder:text-gray-300"
-                    />
-                    <button 
-                        onClick={handleManualFeed}
-                        disabled={loadingManual}
-                        className="w-full py-3 rounded-xl font-bold text-white bg-gradient-to-r from-orange-400 to-red-400 hover:from-orange-500 hover:to-red-500 shadow-md active:scale-95 transition-transform text-xs md:text-sm uppercase tracking-wider">
-                        {loadingManual ? 'Mengirim...' : 'Kirim Perintah'}
-                    </button>
-                </div>
-            </div>
+        {/* --- KARTU KANAN (JADWAL PAKAN) --- */}
+        <div style={styles.cardSmall}>
+          <div style={styles.headerSmall}>
+            <span style={styles.icon}>🕒</span> Jadwal Pakan
+          </div>
 
-            {/* KARTU 2: JADWAL OTOMATIS */}
-            <div className="bg-white/70 backdrop-blur-lg rounded-[2rem] p-6 shadow-xl border border-white/40">
-                <div className="flex items-center gap-2 mb-4">
-                    <div className="p-2 bg-blue-100 rounded-lg text-blue-600">🕒</div>
-                    <h2 className="text-base font-black text-gray-800">Jadwal Pakan</h2>
-                </div>
-                
-                <div className="space-y-3">
-                    {/* Jadwal Pagi */}
-                    <div className="flex justify-between items-center p-3 bg-white/60 rounded-xl border border-white/50">
-                        <div>
-                            <span className="text-[10px] font-bold bg-blue-100 text-blue-600 px-2 py-0.5 rounded">PAGI</span>
-                            <p className="text-xl font-black text-gray-700 mt-1">07:00</p>
-                        </div>
-                        <div className="text-right">
-                            <p className="text-xs text-gray-400 font-bold uppercase">Target</p>
-                            <p className="text-lg font-bold text-gray-600">7.0 <span className="text-xs">Kg</span></p>
-                        </div>
-                    </div>
+          {/* List Jadwal (Static Mockup) */}
+          <div style={styles.scheduleItem}>
+            <span style={styles.tagBlue}>PAGI</span>
+            <span style={styles.time}>07:00</span>
+            <span style={styles.target}>TARGET <b>0.5 Kg</b></span>
+          </div>
 
-                    {/* Jadwal Sore */}
-                    <div className="flex justify-between items-center p-3 bg-white/60 rounded-xl border border-white/50">
-                        <div>
-                            <span className="text-[10px] font-bold bg-purple-100 text-purple-600 px-2 py-0.5 rounded">SORE</span>
-                            <p className="text-xl font-black text-gray-700 mt-1">16:00</p>
-                        </div>
-                        <div className="text-right">
-                            <p className="text-xs text-gray-400 font-bold uppercase">Target</p>
-                            <p className="text-lg font-bold text-gray-600">8.0 <span className="text-xs">Kg</span></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+          <div style={styles.scheduleItem}>
+            <span style={styles.tagPurple}>SORE</span>
+            <span style={styles.time}>16:00</span>
+            <span style={styles.target}>TARGET <b>0.5 Kg</b></span>
+          </div>
         </div>
 
-      </main>
+      </div>
     </div>
   );
 }
+
+// --- CSS IN JS (BIAR GAK RIBET BIKIN FILE CSS LAGI) ---
+const styles = {
+  container: {
+    minHeight: '100vh',
+    backgroundColor: '#FFE8E8', // Background Pink soft sesuai gambar
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '20px',
+    fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+  },
+  cardMain: {
+    backgroundColor: 'white',
+    width: '100%',
+    maxWidth: '600px',
+    borderRadius: '20px',
+    padding: '30px',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
+    marginBottom: '20px',
+  },
+  leftSide: { flex: 1 },
+  cardTitle: { margin: 0, fontSize: '18px', fontWeight: '800', color: '#2c3e50', letterSpacing: '1px' },
+  subTitle: { margin: 0, fontSize: '12px', color: '#95a5a6', marginBottom: '10px' },
+  bigNumber: { fontSize: '60px', fontWeight: 'bold', margin: '10px 0', lineHeight: 1 },
+  unit: { fontSize: '24px', color: '#7f8c8d' },
+  badge: {
+    display: 'inline-block',
+    padding: '5px 15px',
+    borderRadius: '50px',
+    color: 'white',
+    fontSize: '12px',
+    fontWeight: 'bold',
+  },
+  rightSide: {
+    width: '80px',
+    height: '140px',
+    display: 'flex',
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+  },
+  tankContainer: {
+    width: '60px',
+    height: '100%',
+    backgroundColor: '#F0F2F5',
+    borderRadius: '15px',
+    overflow: 'hidden',
+    position: 'relative',
+    border: '4px solid white',
+    boxShadow: 'inset 0 2px 5px rgba(0,0,0,0.1)',
+  },
+  tankFill: {
+    width: '100%',
+    backgroundColor: '#FF5E57', // Merah muda/Pink
+    position: 'absolute',
+    bottom: 0,
+    transition: 'height 0.5s ease',
+  },
+  tankText: {
+    position: 'absolute',
+    bottom: '10px',
+    width: '100%',
+    textAlign: 'center',
+    fontSize: '12px',
+    fontWeight: 'bold',
+    color: '#333',
+    zIndex: 2,
+  },
+  row: {
+    display: 'flex',
+    gap: '20px',
+    width: '100%',
+    maxWidth: '600px',
+    flexWrap: 'wrap', // Biar responsif di HP
+  },
+  cardSmall: {
+    flex: 1,
+    minWidth: '250px',
+    backgroundColor: 'white',
+    borderRadius: '20px',
+    padding: '25px',
+    boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
+  },
+  headerSmall: {
+    fontSize: '16px',
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: '20px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+  },
+  icon: { fontSize: '18px' },
+  inputContainer: { marginBottom: '15px' },
+  input: {
+    width: '100%',
+    padding: '15px',
+    borderRadius: '12px',
+    border: 'none',
+    backgroundColor: '#F7F9FC',
+    fontSize: '24px',
+    textAlign: 'center',
+    fontWeight: 'bold',
+    color: '#333',
+    outline: 'none',
+  },
+  button: {
+    width: '100%',
+    padding: '15px',
+    background: 'linear-gradient(90deg, #FF9966 0%, #FF5E62 100%)', // Gradient Orange
+    border: 'none',
+    borderRadius: '12px',
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: '14px',
+    letterSpacing: '1px',
+    boxShadow: '0 5px 15px rgba(255, 94, 98, 0.4)',
+  },
+  scheduleItem: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#FAFAFA',
+    padding: '12px',
+    borderRadius: '12px',
+    marginBottom: '10px',
+  },
+  tagBlue: {
+    backgroundColor: '#E3F2FD', color: '#2196F3',
+    padding: '4px 8px', borderRadius: '6px', fontSize: '10px', fontWeight: 'bold'
+  },
+  tagPurple: {
+    backgroundColor: '#F3E5F5', color: '#9C27B0',
+    padding: '4px 8px', borderRadius: '6px', fontSize: '10px', fontWeight: 'bold'
+  },
+  time: { fontWeight: 'bold', fontSize: '16px', color: '#333' },
+  target: { fontSize: '12px', color: '#888' }
+};
